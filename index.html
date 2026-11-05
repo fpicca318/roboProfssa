@@ -442,8 +442,8 @@
 
         <!-- SEZIONE 4: GLOSSARIO PARLANTE -->
         <section id="section-glossary" class="hidden min-w-0 flex-1 bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-6 border-4 border-white shadow-xl flex-col justify-between relative overflow-hidden">
-            <div>
-                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-3 gap-2 flex-wrap">
+            <div class="flex-1 flex flex-col h-full min-h-0">
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-2 gap-2 flex-wrap shrink-0">
                     <div class="flex items-center gap-2">
                         <span class="text-2xl">📖✨</span>
                         <h2 class="text-xl sm:text-2xl font-black text-indigo-950">
@@ -456,54 +456,56 @@
                     </button>
                 </div>
 
-                <p class="text-xs sm:text-sm font-bold text-slate-600 mb-3">
+                <p class="text-xs sm:text-sm font-bold text-slate-600 mb-2 shrink-0">
                     Tocca un termine per leggerne la definizione e ascoltare la spiegazione di Robo Prof.ssa.
                 </p>
 
-                <div class="flex items-center justify-center gap-2 mb-3 flex-wrap">
-                    <button id="btn-glossary-filter-all" onclick="filterGlossary('all')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow">
+                <div class="flex items-center justify-center gap-2 mb-2 flex-wrap shrink-0">
+                    <button id="btn-glossary-filter-all" onclick="filterGlossary('all')" class="px-3 py-1 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow">
                         TUTTI (20)
                     </button>
-                    <button id="btn-glossary-filter-positive" onclick="filterGlossary('positive')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50">
+                    <button id="btn-glossary-filter-positive" onclick="filterGlossary('positive')" class="px-3 py-1 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50">
                         🛡️ DIFESE (10)
                     </button>
-                    <button id="btn-glossary-filter-negative" onclick="filterGlossary('negative')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50">
+                    <button id="btn-glossary-filter-negative" onclick="filterGlossary('negative')" class="px-3 py-1 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50">
                         ⚠️ RISCHI (10)
                     </button>
                 </div>
 
-                <div id="glossary-buttons-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 max-h-[160px] sm:max-h-[190px] overflow-y-auto p-1 no-scrollbar">
+                <!-- Griglia Voci Glossario Completa e Scrollabile -->
+                <div id="glossary-buttons-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 overflow-y-auto p-1 border border-slate-200 bg-slate-50/50 rounded-2xl flex-1 max-h-[300px] sm:max-h-[360px]">
                 </div>
 
-                <div id="glossary-detail-card" class="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-100 border-4 border-pink-300 rounded-3xl p-4 shadow-xl flex flex-col sm:flex-row items-center gap-4 relative overflow-hidden transition-all duration-300">
-                    <div id="glossary-term-icon" class="text-5xl sm:text-6xl p-3 bg-white rounded-2xl shadow-md border-2 border-pink-200 shrink-0 animate-bounce-gentle">
+                <!-- Scheda Dettaglio Compatta -->
+                <div id="glossary-detail-card" class="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-100 border-2 border-pink-300 rounded-2xl p-3 shadow-md flex flex-row items-center gap-3 shrink-0">
+                    <div id="glossary-term-icon" class="text-3xl sm:text-4xl p-2 bg-white rounded-xl shadow border border-pink-200 shrink-0">
                         🤖
                     </div>
 
-                    <div class="flex-1 min-w-0 text-center sm:text-left">
-                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1 flex-wrap">
-                            <h3 id="glossary-term-title" class="text-lg sm:text-xl font-black text-indigo-950">
+                    <div class="flex-1 min-w-0 text-left">
+                        <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+                            <h3 id="glossary-term-title" class="text-sm sm:text-base font-black text-indigo-950 truncate">
                                 Intelligenza Artificiale generativa
                             </h3>
-                            <span id="glossary-term-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                            <span id="glossary-term-badge" class="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
                                 🛡️ STRUMENTO
                             </span>
                         </div>
 
-                        <p id="glossary-term-desc" class="text-xs sm:text-sm font-semibold text-slate-700 leading-snug mb-2">
+                        <p id="glossary-term-desc" class="text-xs font-semibold text-slate-700 leading-tight mb-1 line-clamp-2">
                         </p>
-
-                        <button onclick="speakSelectedGlossaryTerm()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md transition inline-flex items-center gap-2">
-                            <span class="text-sm">🔊</span>
-                            <span>ASCOLTA LA SPIEGAZIONE</span>
-                        </button>
                     </div>
+
+                    <button onclick="speakSelectedGlossaryTerm()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow transition inline-flex items-center gap-1 shrink-0">
+                        <span>🔊</span>
+                        <span class="hidden sm:inline">ASCOLTA</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="pt-2 text-center">
+            <div class="pt-2 text-center shrink-0">
                 <span class="text-[11px] font-bold text-slate-500">
-                    💡 Tocca un termine qualsiasi per ascoltare Robo Prof.ssa.
+                    💡 Tutte le 20 voci sono sempre visibili e cliccabili scorrendo la griglia sopra.
                 </span>
             </div>
         </section>
@@ -1494,9 +1496,9 @@ function filterGlossary(filterType) {
     playBip();
     glossaryFilter = filterType;
 
-    document.getElementById('btn-glossary-filter-all').className = filterType === 'all' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-slate-700 border border-slate-300 hover:bg-slate-50";
-    document.getElementById('btn-glossary-filter-positive').className = filterType === 'positive' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-emerald-600 text-white border border-emerald-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50";
-    document.getElementById('btn-glossary-filter-negative').className = filterType === 'negative' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-rose-600 text-white border border-rose-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50";
+    document.getElementById('btn-glossary-filter-all').className = filterType === 'all' ? "px-3 py-1 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow" : "px-3 py-1 rounded-xl font-black text-xs bg-white text-slate-700 border border-slate-300 hover:bg-slate-50";
+    document.getElementById('btn-glossary-filter-positive').className = filterType === 'positive' ? "px-3 py-1 rounded-xl font-black text-xs bg-emerald-600 text-white border border-emerald-700 shadow" : "px-3 py-1 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50";
+    document.getElementById('btn-glossary-filter-negative').className = filterType === 'negative' ? "px-3 py-1 rounded-xl font-black text-xs bg-rose-600 text-white border border-rose-700 shadow" : "px-3 py-1 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50";
 
     renderGlossaryButtons();
 }
@@ -1512,14 +1514,14 @@ function renderGlossaryButtons() {
         const isPos = term.category === 'positive';
         const btn = document.createElement('button');
 
-        btn.className = `p-2 rounded-2xl border-2 font-black text-xs flex items-center gap-2 transition text-left shadow-sm min-w-0 ${
+        btn.className = `p-2 rounded-xl border-2 font-black text-xs flex items-center gap-1.5 transition text-left shadow-sm min-w-0 ${
             isSelected
-                ? 'bg-pink-400 text-pink-950 border-pink-500 scale-105 z-10 shadow-md'
+                ? 'bg-pink-400 text-pink-950 border-pink-500 scale-102 z-10 shadow-md'
                 : (isPos ? 'bg-emerald-50 text-emerald-950 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-950 border-rose-200 hover:bg-rose-100')
         }`;
         btn.title = term.name;
         btn.onclick = () => selectGlossaryTerm(index);
-        btn.innerHTML = `<span class="text-xl shrink-0">${term.emoji}</span><span class="truncate leading-tight">${term.name}</span>`;
+        btn.innerHTML = `<span class="text-base shrink-0">${term.emoji}</span><span class="truncate leading-tight">${term.name}</span>`;
         grid.appendChild(btn);
     });
 }
@@ -1540,7 +1542,7 @@ function renderSelectedGlossaryTerm() {
 
     const badge = document.getElementById('glossary-term-badge');
     badge.innerText = term.badgeText;
-    badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-black border ${term.badgeClass}`;
+    badge.className = `px-2 py-0.5 rounded-full text-[9px] font-black border ${term.badgeClass}`;
 }
 
 function speakSelectedGlossaryTerm() {
