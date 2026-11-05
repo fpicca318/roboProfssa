@@ -1,1153 +1,1564 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Robo-Prof</title>
+<title>Robo Prof.ssa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* Layout: intestazione a schede, colonna guida (robot) a sinistra, area di lavoro a destra; stile quaderno di laboratorio su carta a quadretti */
-:root {
-  --bg: #eef1f7;
-  --grid: #dfe4ef;
-  --panel: #ffffff;
-  --panel-2: #f4f6fb;
-  --ink: #0f1733;
-  --muted: #55607e;
-  --line: #d3d9e8;
-  --accent: #2c47f5;
-  --accent-soft: #e2e7ff;
-  --on-accent: #ffffff;
-  --warn: #c9540a;
-  --warn-soft: #ffe9d9;
-  --ok: #0e8a58;
-  --ok-soft: #d9f5e8;
-  --bad: #cf2c47;
-  --bad-soft: #fde0e5;
-  --stage: #0f1733;
-  --stage-ink: #e9edfb;
-  --stage-line: #2b3560;
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0a0f20; --grid: #121a33; --panel: #131b36; --panel-2: #192244; --ink: #e8ecfb; --muted: #9ba7c9;
-    --line: #2a3459; --accent: #8097ff; --accent-soft: #232f66; --on-accent: #0a0f20;
-    --warn: #ff9b50; --warn-soft: #3a2616; --ok: #40d79c; --ok-soft: #12382b; --bad: #ff6e88; --bad-soft: #3d1a25;
-    --stage: #070b19; --stage-ink: #e9edfb; --stage-line: #2b3560;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0a0f20; --grid: #121a33; --panel: #131b36; --panel-2: #192244; --ink: #e8ecfb; --muted: #9ba7c9;
-  --line: #2a3459; --accent: #8097ff; --accent-soft: #232f66; --on-accent: #0a0f20;
-  --warn: #ff9b50; --warn-soft: #3a2616; --ok: #40d79c; --ok-soft: #12382b; --bad: #ff6e88; --bad-soft: #3d1a25;
-  --stage: #070b19; --stage-ink: #e9edfb; --stage-line: #2b3560;
-  color-scheme: dark;
-}
+    :root { color-scheme: light; }
 
-* { box-sizing: border-box; }
-body {
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 28px 28px;
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.5;
-  min-height: 100%;
-  padding-block: 16px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-}
-button { font: inherit; color: inherit; cursor: pointer; }
-button:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.15; text-wrap: balance; }
-p { margin: 0; }
-.mono { font-family: var(--font-mono); }
+    * {
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
 
-.app { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    body {
+        font-family: 'Fredoka', system-ui, sans-serif;
+        overflow-x: hidden;
+        background-color: #e0e7ff;
+        background-image: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 50%, #fce7f3 100%);
+        background-attachment: fixed;
+        color: #1e293b;
+    }
 
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  min-width: 0;
-}
+    .shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 12px;
+        padding-block: 12px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
 
-/* Intestazione */
-.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 12px 16px; }
-.brand { display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 0; text-align: left; }
-.brand-mark { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; }
-.brand h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
-.brand small { display: block; font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.tab {
-  padding: 8px 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2);
-  font-weight: 600; font-size: 14px;
-}
-.tab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.tab:hover:not([aria-selected="true"]) { border-color: var(--accent); }
-.stars { font-family: var(--font-mono); font-size: 13px; padding: 8px 12px; border-radius: 9px; background: var(--accent-soft); display: flex; gap: 8px; align-items: center; }
-.stars b { font-weight: 600; }
+    @keyframes bounceGentle {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
+    .animate-bounce-gentle { animation: bounceGentle 2.2s infinite ease-in-out; }
 
-/* Colonna guida */
-.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 16px; align-items: start; }
-.guide { padding: 16px; display: flex; flex-direction: column; gap: 14px; align-items: center; position: sticky; top: env(safe-area-inset-top, 0px); }
-.bubble { width: 100%; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.45; position: relative; }
-.bubble::after { content: ""; position: absolute; left: 50%; bottom: -8px; width: 14px; height: 14px; background: var(--accent-soft); border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent); transform: translateX(-50%) rotate(45deg); }
-#robot-text { min-height: 4.4em; }
-.avatar { width: 170px; max-width: 100%; }
-.avatar svg { width: 100%; height: auto; display: block; }
-.audio-row { display: flex; gap: 8px; width: 100%; }
-.btn { padding: 8px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-.btn:hover:not(:disabled) { border-color: var(--accent); }
-.btn:disabled { opacity: 0.4; cursor: default; }
-.btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.btn.big { padding: 12px 16px; font-size: 15px; }
-.btn.grow { flex: 1; }
+    @keyframes pulseGlow {
+        0%, 100% { filter: drop-shadow(0 0 10px rgba(236, 72, 153, 0.5)); }
+        50% { filter: drop-shadow(0 0 25px rgba(168, 85, 247, 0.9)); }
+    }
+    .robot-glow { animation: pulseGlow 2s infinite ease-in-out; }
 
-@keyframes glow { 0%,100% { filter: drop-shadow(0 0 4px rgba(99,120,255,.35)); } 50% { filter: drop-shadow(0 0 14px rgba(99,120,255,.7)); } }
-.avatar { animation: glow 3s ease-in-out infinite; }
-@keyframes happy { 0%,100% { transform: scale(1) rotate(0); } 25% { transform: scale(1.08) rotate(-5deg); } 75% { transform: scale(1.08) rotate(5deg); } }
-.robot-happy { animation: happy .5s ease-in-out 2; }
-@keyframes sad { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
-.robot-sad { animation: sad .5s ease-in-out; }
-@keyframes mouthTalk { 0% { d: path('M 75 85 Q 100 92 125 85'); } 100% { d: path('M 75 85 Q 100 112 125 85'); } }
-.robot-talking #robot-mouth { animation: mouthTalk .2s infinite alternate; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.spin { animation: spin 14s linear infinite; transform-box: fill-box; transform-origin: center; }
-.spin.rev { animation-direction: reverse; animation-duration: 9s; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
-.pulse { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes robotHappy {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.15) rotate(-8deg); }
+        75% { transform: scale(1.15) rotate(8deg); }
+    }
+    .robot-happy { animation: robotHappy 0.5s ease-in-out 2; }
 
-/* Sezioni */
-.view { padding: 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.view.lab { padding: 16px; }
-.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-.badge { font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); white-space: nowrap; }
-.badge.accent { background: var(--accent-soft); border-color: var(--accent); }
-.badge.train { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
-.badge.test { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.view h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; }
-.desc { color: var(--muted); max-width: 68ch; }
-.lead { font-size: 15px; color: var(--muted); max-width: 70ch; }
-.kicker { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    @keyframes robotSad {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-12px); }
+        40%, 80% { transform: translateX(12px); }
+    }
+    .robot-sad { animation: robotSad 0.5s ease-in-out; }
 
-.viz { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 170px; }
-.viz svg { width: 100%; max-width: 460px; height: auto; max-height: 200px; }
-.ln { stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.ln.thin { stroke-width: 1.2; }
-.ln.acc { stroke: var(--accent); }
-.ln.wrn { stroke: var(--warn); }
-.ln.bd { stroke: var(--bad); }
-.ln.mt { stroke: var(--muted); }
-.fa { fill: var(--accent); }
-.fw { fill: var(--warn); }
-.fo { fill: var(--ok); }
-.fm { fill: var(--muted); }
-.fp { fill: var(--panel); }
-.fs { fill: var(--accent-soft); }
-.fi { fill: var(--ink); }
-.tx { fill: var(--ink); font-family: var(--font-mono); font-size: 11px; }
-.tx.sm { font-size: 9.5px; }
-.tx.lg { font-size: 15px; font-weight: 600; }
-.tx.mt { fill: var(--muted); }
-.tx.ac { fill: var(--accent); }
-.tx.wn { fill: var(--warn); }
-.tx.on { fill: var(--on-accent); }
+    @keyframes floatTag {
+        0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        100% { opacity: 0; transform: translate(-50%, -120%) scale(1.15); }
+    }
+    .float-feedback { animation: floatTag 1.2s ease-out forwards; }
 
-.map-title { display: block; margin-bottom: 8px; }
-.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; max-height: 188px; overflow-y: auto; padding: 6px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; }
-.thumb { border: 1px solid var(--line); background: var(--panel); border-radius: 9px; padding: 6px 8px; text-align: left; display: flex; flex-direction: column; gap: 1px; position: relative; min-width: 0; }
-.thumb .y { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.thumb .n { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.thumb.seen { border-color: var(--accent); }
-.thumb.seen::after { content: ""; position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-.thumb.now { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.thumb.now .y { color: var(--on-accent); opacity: .85; }
-.thumb.now::after { background: var(--on-accent); }
-.nav-row { display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 12px; }
+    .draggable-item {
+        cursor: grab;
+        transition: transform 0.2s ease, filter 0.2s ease;
+        touch-action: none;
+    }
+    .draggable-item:active { cursor: grabbing; transform: scale(1.1) rotate(3deg); z-index: 50; }
 
-/* ML */
-.model-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.model-tab { padding: 10px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); text-align: left; display: flex; flex-direction: column; gap: 2px; }
-.model-tab .k { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.model-tab .t { font-weight: 600; font-size: 14px; }
-.model-tab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.model-tab[aria-selected="true"] .k { color: var(--on-accent); opacity: .85; }
-.detail { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.detail h3 { font-size: 20px; }
-.terms { display: flex; flex-wrap: wrap; gap: 6px; }
-.term { font-family: var(--font-mono); font-size: 11.5px; padding: 3px 8px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); }
-.mlviz { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px; min-height: 190px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.mlviz svg { width: 100%; max-width: 420px; height: auto; }
-.status { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: center; }
+    .basket-target { transition: all 0.2s ease-in-out; cursor: pointer; }
+    .basket-target.drag-over {
+        transform: scale(1.06);
+        filter: brightness(1.15);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+    }
 
-/* Laboratorio */
-.subtabs { display: flex; gap: 6px; flex-wrap: wrap; }
-.subtab { padding: 7px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); font-size: 13px; font-weight: 600; }
-.subtab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.intro { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-.intro p { font-size: 13px; max-width: 70ch; }
-.belt {
-  position: relative; border-radius: 12px; min-height: 150px; border: 1px solid var(--stage-line); overflow: hidden;
-  background: repeating-linear-gradient(90deg, #1b2447 0 20px, #151c3a 20px 40px);
-  display: flex; align-items: center; justify-content: center; padding: 12px;
-}
-@keyframes belt { to { background-position: 40px 0; } }
-.belt.run { animation: belt .5s linear infinite; }
-.msg { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; max-width: 460px; width: 100%; display: flex; flex-direction: column; gap: 6px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: transform .2s ease, opacity .2s ease; position: relative; z-index: 3; }
-.msg:active { cursor: grabbing; }
-.msg .from { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.msg .body { font-size: 14px; font-weight: 500; }
-.chips { display: flex; gap: 5px; flex-wrap: wrap; }
-.chip { font-family: var(--font-mono); font-size: 10.5px; padding: 2px 7px; border-radius: 5px; background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); }
-.chip.none { background: var(--panel-2); color: var(--muted); border-color: var(--line); }
-.beam { position: absolute; top: 0; bottom: 0; width: 3px; background: #4fe0ff; box-shadow: 0 0 14px #4fe0ff; z-index: 5; animation: scan 1.2s ease-in-out infinite alternate; }
-@keyframes scan { from { left: 3%; } to { left: 97%; } }
-.verdict { position: absolute; right: 10px; top: 10px; z-index: 6; font-family: var(--font-mono); font-size: 12px; padding: 4px 9px; border-radius: 6px; font-weight: 600; }
-.verdict.ok { background: var(--ok); color: #04170f; }
-.verdict.bad { background: var(--bad); color: #fff; }
-.overlay { position: absolute; inset: 0; background: rgba(7, 11, 25, .94); z-index: 8; display: flex; flex-direction: column; gap: 10px; align-items: center; justify-content: center; text-align: center; padding: 12px; color: var(--stage-ink); }
-.overlay p { font-size: 13.5px; max-width: 52ch; }
-.overlay code { font-family: var(--font-mono); color: #ffd27a; }
-.baskets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.basket { border: 2px dashed var(--line); border-radius: 12px; padding: 10px; min-height: 130px; display: flex; flex-direction: column; gap: 8px; background: var(--panel-2); text-align: left; transition: transform .15s ease, border-color .15s ease; }
-.basket.spam { border-color: var(--bad); }
-.basket.okb { border-color: var(--ok); }
-.basket.drag-over { transform: scale(1.02); background: var(--accent-soft); }
-.basket h3 { font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.basket h3 span { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-weight: 400; }
-.dots { display: flex; flex-wrap: wrap; gap: 5px; align-content: flex-start; }
-.dot { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; color: #fff; }
-.basket.spam .dot { background: var(--bad); }
-.basket.okb .dot { background: var(--ok); color: #04170f; }
-.hint { font-size: 13px; color: var(--muted); text-align: center; }
+    .robot-talking #robot-mouth { animation: mouthTalk 0.2s infinite alternate; }
+    @keyframes mouthTalk {
+        0% { d: path('M 75 90 Q 100 98 125 90'); }
+        100% { d: path('M 75 90 Q 100 118 125 90'); }
+    }
 
-.tree-stage { background: var(--stage); color: var(--stage-ink); border-radius: 14px; border: 1px solid var(--stage-line); padding: 14px; position: relative; display: flex; flex-direction: column; gap: 10px; align-items: center; overflow: hidden; min-height: 330px; }
-.item-box { background: var(--panel); color: var(--ink); border-radius: 10px; padding: 8px 12px; width: 100%; max-width: 560px; border: 1px solid var(--line); }
-.item-box .from { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.item-box .body { font-size: 14px; font-weight: 500; }
-.node { background: #1a2347; border: 1px solid var(--stage-line); border-radius: 10px; padding: 8px 10px; text-align: center; opacity: .5; transition: all .25s ease; min-width: 0; }
-.node .tag { font-family: var(--font-mono); font-size: 10px; color: #aab6e8; text-transform: uppercase; letter-spacing: .08em; }
-.node p { font-size: 13.5px; font-weight: 600; margin-top: 2px; }
-.node.active { opacity: 1; background: #fff; color: #0f1733; border-color: #ffd27a; border-width: 2px; }
-.node.active .tag { color: #55607e; }
-.node.passed { opacity: .8; background: #2a3565; }
-.node.root { width: min(300px, 100%); }
-.yn { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
-.yn button { padding: 4px 16px; border-radius: 7px; border: 0; font-weight: 700; font-size: 13px; color: #fff; }
-.yn .y { background: #0e8a58; }
-.yn .n { background: #cf2c47; }
-.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 560px; }
-.leaves { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; max-width: 560px; }
-.leaf { background: #1a2347; border: 1px solid var(--stage-line); border-radius: 8px; padding: 6px 4px; text-align: center; opacity: .45; transition: all .25s ease; min-width: 0; }
-.leaf .tag { display: block; font-family: var(--font-mono); font-size: 9px; color: #aab6e8; }
-.leaf b { font-size: 11px; line-height: 1.2; display: block; overflow-wrap: anywhere; }
-.leaf.hit { opacity: 1; background: #ffd27a; color: #0f1733; border-color: #fff; transform: scale(1.05); }
-.leaf.hit .tag { color: #55607e; }
-.branches { width: 100%; max-width: 560px; height: 34px; }
-.branches path { stroke: #7f8cc9; stroke-width: 1.6; fill: none; stroke-dasharray: 4 3; }
-.branches text { fill: #aab6e8; font-family: var(--font-mono); font-size: 9px; }
-.banner { background: var(--ok); color: #04170f; border-radius: 9px; padding: 7px 12px; font-size: 13px; font-weight: 600; text-align: center; width: 100%; max-width: 560px; }
-.progress { text-align: center; font-family: var(--font-mono); font-size: 12px; background: var(--accent-soft); border-radius: 9px; padding: 7px 12px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Modali */
-.modal { position: fixed; inset: 0; background: rgba(6, 9, 20, .7); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.modal-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; max-width: 520px; width: 100%; max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-.modal-card h3 { font-size: 22px; font-weight: 800; }
-.results { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
-.results li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; font-size: 13px; padding: 6px 8px; border-radius: 8px; background: var(--panel-2); }
-.results li b { font-family: var(--font-mono); }
-.results li.ok b { color: var(--ok); }
-.results li.bad b { color: var(--bad); }
-.note { background: var(--warn-soft); border: 1px solid var(--warn); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
-.float { position: fixed; left: 50%; top: calc(80px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 60; padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 600; pointer-events: none; animation: fl .9s ease-out forwards; max-width: calc(100vw - 32px); text-align: center; }
-.float.ok { background: var(--ok); color: #04170f; }
-.float.bad { background: var(--bad); color: #fff; }
-@keyframes fl { 0% { opacity: 0; transform: translate(-50%, 8px); } 15% { opacity: 1; transform: translate(-50%, 0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -14px); } }
+    button:focus-visible { outline: 3px solid #6366f1; outline-offset: 2px; }
 
-footer.foot { text-align: center; font-size: 12px; color: var(--muted); padding: 10px 12px; font-family: var(--font-mono); }
-
-@media (max-width: 880px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .guide { position: static; flex-direction: row; flex-wrap: wrap; justify-content: center; }
-  .bubble { flex: 1 1 100%; order: -1; }
-  .avatar { width: 110px; }
-  .audio-row { width: auto; flex: 1; min-width: 200px; }
-}
-@media (max-width: 520px) {
-  .view { padding: 14px; }
-  .view h2 { font-size: 22px; }
-  .model-tab .t { font-size: 12.5px; }
-  .tab { padding: 7px 10px; font-size: 13px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-}
+    @media (prefers-reduced-motion: reduce) {
+        .animate-bounce-gentle, .robot-glow, .animate-bounce, .animate-pulse { animation: none !important; }
+    }
 </style>
 
-<div class="app">
+<div class="shell text-slate-800">
 
-  <header class="panel top">
-    <button class="brand" onclick="switchSection('history')" aria-label="Torna alla storia">
-      <span class="brand-mark">
-        <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="4" y="7" width="18" height="13" rx="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="10" cy="13.5" r="2" fill="#fff"/><circle cx="16" cy="13.5" r="2" fill="#fff"/><path d="M13 7V3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
-      </span>
-      <span>
-        <h1>Robo-Prof</h1>
-        <small>Intelligenza artificiale · percorso per 14–16 anni</small>
-      </span>
-    </button>
-    <nav class="tabs" role="tablist" aria-label="Sezioni">
-      <button class="tab" role="tab" id="nav-btn-history" aria-selected="true" onclick="switchSection('history')">1. Storia</button>
-      <button class="tab" role="tab" id="nav-btn-ml" aria-selected="false" onclick="switchSection('ml')">2. Come impara</button>
-      <button class="tab" role="tab" id="nav-btn-trainer" aria-selected="false" onclick="switchSection('trainer')">3. Laboratorio</button>
-      <span class="stars" title="Tappe della storia visitate"><span>Tappe viste</span><b id="star-count">0/18</b></span>
-    </nav>
-  </header>
+    <!-- BARRA SUPERIORE NAVIGATION & PROGRESSO -->
+    <header class="w-full max-w-6xl mx-auto bg-white/90 backdrop-blur-md p-3 sm:p-4 rounded-3xl border-4 border-white shadow-xl z-20 flex flex-col sm:flex-row items-center justify-between gap-3">
 
-  <main class="layout">
-
-    <aside class="panel guide">
-      <div class="bubble"><p id="robot-text">Ciao, sono Robo-Prof. Ripercorriamo 220 anni di idee che hanno portato all'intelligenza artificiale di oggi.</p></div>
-      <div id="robot-avatar" class="avatar">
-        <svg viewBox="0 0 200 200" role="img" aria-label="Robo-Prof">
-          <rect x="92" y="8" width="16" height="24" fill="#64748B" rx="4"/>
-          <circle id="robot-antenna-light" cx="100" cy="10" r="10" fill="#F59E0B" class="pulse"/>
-          <rect x="35" y="30" width="130" height="90" fill="#3B4BDB" rx="22" stroke="#2A36A8" stroke-width="5"/>
-          <rect x="48" y="42" width="104" height="66" fill="#0F1733" rx="14"/>
-          <circle cx="72" cy="70" r="15" fill="#4FE0FF"/><circle cx="75" cy="67" r="5" fill="#fff"/>
-          <circle cx="128" cy="70" r="15" fill="#4FE0FF"/><circle cx="131" cy="67" r="5" fill="#fff"/>
-          <path id="robot-mouth" d="M 75 85 Q 100 95 125 85" fill="none" stroke="#4FE0FF" stroke-width="6" stroke-linecap="round"/>
-          <path d="M 60 120 L 140 120 L 155 185 L 45 185 Z" fill="#4F5FEA" stroke="#2A36A8" stroke-width="4"/>
-          <rect x="82" y="138" width="36" height="26" rx="5" fill="#0F1733"/>
-          <path d="M 88 156 L 94 146 L 100 156 L 106 146 L 112 156" fill="none" stroke="#4FE0FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="audio-row">
-        <button class="btn grow" onclick="toggleMute()"><span id="mute-text">Audio attivo</span></button>
-        <button class="btn" onclick="speakCurrentContext()" aria-label="Ripeti la spiegazione">Ripeti</button>
-      </div>
-    </aside>
-
-    <!-- SEZIONE 1: STORIA -->
-    <section id="section-history" class="panel view">
-      <div class="row">
-        <span id="history-step-badge" class="badge accent">Tappa 1 di 18</span>
-        <span id="history-year" class="badge">1801</span>
-      </div>
-      <div>
-        <span id="history-tag" class="kicker">Hardware e programmazione</span>
-        <h2 id="history-title">Telaio di Jacquard</h2>
-      </div>
-      <p id="history-description" class="desc"></p>
-      <div id="history-svg-container" class="viz"></div>
-      <div>
-        <span class="kicker map-title">Mappa delle 18 tappe: scegli dove andare</span>
-        <div id="timeline-thumbnails" class="thumbs"></div>
-      </div>
-      <div class="nav-row">
-        <button id="btn-hist-prev" class="btn" onclick="changeHistorySlide(-1)">← Indietro</button>
-        <button class="btn" onclick="speakCurrentContext()">Ascolta</button>
-        <button class="btn" onclick="openCuriosityModal()">Approfondimento</button>
-        <button id="btn-hist-next" class="btn primary" onclick="changeHistorySlide(1)">Avanti →</button>
-      </div>
-    </section>
-
-    <!-- SEZIONE 2: COME IMPARA -->
-    <section id="section-ml" class="panel view" hidden>
-      <div>
-        <span class="kicker">Paradigmi di apprendimento</span>
-        <h2>Tre modi di imparare dai dati</h2>
-      </div>
-      <p class="lead">Un modello di machine learning non riceve regole scritte da un programmatore: le ricava dai dati. Cambia il tipo di dato che riceve e il segnale che usa per correggersi.</p>
-      <div class="model-tabs" role="tablist">
-        <button id="btn-ml-1" class="model-tab" role="tab" aria-selected="true" onclick="selectMLTab(0)"><span class="k">TIPO A</span><span class="t">Supervisionato</span></button>
-        <button id="btn-ml-2" class="model-tab" role="tab" aria-selected="false" onclick="selectMLTab(1)"><span class="k">TIPO B</span><span class="t">Non supervisionato</span></button>
-        <button id="btn-ml-3" class="model-tab" role="tab" aria-selected="false" onclick="selectMLTab(2)"><span class="k">TIPO C</span><span class="t">Per rinforzo</span></button>
-      </div>
-      <div class="detail">
-        <div>
-          <h3 id="ml-title"></h3>
-          <span id="ml-subtitle" class="kicker"></span>
-        </div>
-        <p id="ml-description" class="desc"></p>
-        <div id="ml-terms" class="terms"></div>
-        <div id="ml-visual-box" class="mlviz"></div>
-      </div>
-      <button id="btn-ml-action" class="btn primary big" onclick="triggerMLDemoAction()"><span id="ml-action-text">Prova la tecnica</span></button>
-    </section>
-
-    <!-- SEZIONE 3: LABORATORIO -->
-    <section id="section-trainer" class="panel view lab" hidden>
-      <div class="row">
-        <div class="subtabs" role="tablist">
-          <button id="btn-subgame-classification" class="subtab" role="tab" aria-selected="true" onclick="switchLabSubGame('classification')">1. Classificazione spam</button>
-          <button id="btn-subgame-tree" class="subtab" role="tab" aria-selected="false" onclick="switchLabSubGame('tree')">2. Albero decisionale</button>
-        </div>
-        <div class="row" style="gap:8px">
-          <span id="trainer-phase-badge" class="badge train">Fase 1 · Training</span>
-          <button class="btn" onclick="resetActiveLabGame()">Ricomincia</button>
-        </div>
-      </div>
-
-      <!-- Gioco A -->
-      <div id="subgame-classification-container" style="display:flex;flex-direction:column;gap:12px">
-        <div class="intro">
-          <p><b>Training set.</b> Etichetta a mano 6 messaggi trascinandoli nel cesto giusto (o toccando il cesto). Ogni indizio rosso è una <i>feature</i>. Poi il modello ricaverà una regola e la applicherà a 6 messaggi che non ha mai visto: il <i>test set</i>.</p>
-          <span id="trainer-progress-text" class="badge accent">Esempi etichettati: 0 / 6</span>
-        </div>
-        <div id="conveyor-container" class="belt">
-          <div id="scanner-laser" class="beam" hidden></div>
-          <div id="fruit-spawn" style="width:100%;display:flex;justify-content:center"></div>
-          <div id="magic-ml-panel" class="overlay" hidden>
-            <p class="kicker" style="color:#aab6e8">Training completato</p>
-            <p id="learned-rule"></p>
-            <button id="btn-start-magic" class="btn primary big" onclick="startMagicML()">Avvia il test su dati nuovi</button>
-          </div>
-        </div>
-        <div class="baskets">
-          <button id="spam-basket" class="basket spam" aria-label="Cesto spam">
-            <h3>Spam <span id="spam-count-tag">(0)</span></h3>
-            <div id="spam-container" class="dots"></div>
-          </button>
-          <button id="ok-basket" class="basket okb" aria-label="Cesto messaggi legittimi">
-            <h3>Legittimo <span id="ok-count-tag">(0)</span></h3>
-            <div id="ok-container" class="dots"></div>
-          </button>
-        </div>
-        <p id="trainer-instruction-text" class="hint">Trascina il messaggio nel cesto giusto, oppure toccalo e poi tocca il cesto.</p>
-      </div>
-
-      <!-- Gioco B -->
-      <div id="subgame-tree-container" style="display:none;flex-direction:column;gap:12px">
-        <div class="intro">
-          <p><b>Albero decisionale.</b> Una sequenza di domande sì/no che divide i dati in gruppi sempre più "puri". L'algoritmo (ad esempio CART) sceglie ogni domanda calcolando quanto riduce l'<b>impurità di Gini</b>: 0 significa nodo puro, 0,5 incertezza massima tra due classi.</p>
-          <button class="btn" onclick="speakTreeConcept()">Spiegamelo</button>
-        </div>
-        <div class="tree-stage">
-          <div id="tree-scanner-laser" class="beam" hidden style="background:#c084fc;box-shadow:0 0 14px #c084fc"></div>
-          <div class="item-box">
-            <div class="from" id="tree-from">Messaggio in ingresso</div>
-            <div class="body" id="tree-mystery"></div>
-          </div>
-          <div id="tree-node-1" class="node root active">
-            <span class="tag">Radice · domanda 1</span>
-            <p>Il mittente è in rubrica?</p>
-            <div id="tree-q1-controls" class="yn">
-              <button class="y" onclick="answerTreeQuestion(1, true)">Sì</button>
-              <button class="n" onclick="answerTreeQuestion(1, false)">No</button>
+        <!-- Logo App -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchSection('stories')">
+            <div class="bg-gradient-to-tr from-pink-400 to-purple-500 text-white p-3 rounded-2xl text-2xl sm:text-3xl shadow-lg animate-bounce-gentle leading-none">
+                🛡️
             </div>
-          </div>
-          <svg class="branches" viewBox="0 0 300 34" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M150 0 C150 18 75 14 75 34 M150 0 C150 18 225 14 225 34"/>
-          </svg>
-          <div class="row2">
-            <div id="tree-node-2a" class="node">
-              <span class="tag">Sì · rubrica</span>
-              <p>Chiede denaro o password?</p>
-              <div id="tree-q2a-controls" class="yn" hidden>
-                <button class="y" onclick="answerTreeQuestion('2a', true)">Sì</button>
-                <button class="n" onclick="answerTreeQuestion('2a', false)">No</button>
-              </div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black text-indigo-950 leading-tight">ROBO PROF.SSA</h1>
+                <p class="text-xs sm:text-sm font-bold text-pink-600">Cittadinanza digitale: IA, rete e difese consapevoli</p>
             </div>
-            <div id="tree-node-2b" class="node">
-              <span class="tag">No · sconosciuto</span>
-              <p>Contiene un link abbreviato?</p>
-              <div id="tree-q2b-controls" class="yn" hidden>
-                <button class="y" onclick="answerTreeQuestion('2b', true)">Sì</button>
-                <button class="n" onclick="answerTreeQuestion('2b', false)">No</button>
-              </div>
+        </div>
+
+        <!-- Selettore Sezioni Modalità -->
+        <div class="flex items-center gap-1.5 sm:gap-2 w-full sm:w-auto justify-center flex-wrap">
+            <button id="nav-btn-stories" onclick="switchSection('stories')" class="px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-indigo-600 text-white border-indigo-700 shadow-md">
+                <span>📖</span>
+                <span>1. RISCHI DELL'IA</span>
+            </button>
+
+            <button id="nav-btn-detector" onclick="switchSection('detector')" class="px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-white text-indigo-900 border-indigo-200 hover:bg-indigo-50">
+                <span>🔍</span>
+                <span>2. DETECTIVE VERO O FALSO</span>
+            </button>
+
+            <button id="nav-btn-trainer" onclick="switchSection('trainer')" class="px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-white text-indigo-900 border-indigo-200 hover:bg-indigo-50">
+                <span>🎮</span>
+                <span>3. PALESTRA SCUDO</span>
+            </button>
+
+            <button id="nav-btn-glossary" onclick="switchSection('glossary')" class="px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-white text-indigo-900 border-indigo-200 hover:bg-indigo-50">
+                <span>🗂️</span>
+                <span>4. GLOSSARIO IA</span>
+            </button>
+
+            <!-- Badge Stelle -->
+            <div class="bg-amber-100 border-2 border-amber-300 text-amber-900 px-3 py-2 rounded-2xl font-black text-xs sm:text-sm flex items-center gap-1 shadow-sm" title="Rischi esplorati">
+                <span class="text-base sm:text-lg">⭐</span>
+                <span id="star-count">1/20</span>
             </div>
-          </div>
-          <div class="leaves">
-            <div id="leaf-hacked" class="leaf"><span class="tag">foglia</span><b>Account compromesso</b></div>
-            <div id="leaf-legit" class="leaf"><span class="tag">foglia</span><b>Messaggio legittimo</b></div>
-            <div id="leaf-phishing" class="leaf"><span class="tag">foglia</span><b>Phishing</b></div>
-            <div id="leaf-newsletter" class="leaf"><span class="tag">foglia</span><b>Newsletter</b></div>
-          </div>
-          <div id="tree-result-banner" class="banner" hidden></div>
         </div>
-        <div>
-          <button id="btn-tree-magic-test" class="btn primary big" style="width:100%" onclick="startMagicTreeTest()" hidden>Albero addestrato: avvia il test su 5 messaggi nuovi</button>
-          <p id="tree-training-progress-text" class="progress">Percorsi verificati: 0 / 4</p>
+    </header>
+
+    <!-- CONTAINER CENTRALE -->
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col lg:flex-row items-stretch gap-4 z-10">
+
+        <!-- PANNELLO AVATAR E VOCE GUIDA (FISSO A SINISTRA) -->
+        <aside class="w-full lg:w-80 bg-white/90 backdrop-blur-md rounded-3xl p-4 border-4 border-white shadow-xl flex flex-col items-center justify-between relative overflow-hidden shrink-0">
+
+            <!-- Speech Bubble (Fumetto) -->
+            <div id="speech-bubble" class="w-full bg-pink-100 border-4 border-pink-300 rounded-2xl p-3 text-center shadow-md relative mb-2 transition-all duration-300 cursor-pointer" onclick="speakCurrentContext()">
+                <p id="robot-text" class="text-xs sm:text-sm font-bold text-pink-950 leading-snug">
+                    Ciao, sono Robo Prof.ssa! Qui impari a riconoscere i rischi dell'IA e della rete e a difenderti con metodo. Tocca qui per ascoltarmi.
+                </p>
+                <div class="w-4 h-4 bg-pink-100 border-r-4 border-b-4 border-pink-300 transform rotate-45 mx-auto -mb-5 mt-1"></div>
+            </div>
+
+            <!-- Avatar SVG Robottina Femmina -->
+            <div id="robot-avatar" class="w-36 sm:w-44 lg:w-52 h-36 sm:h-44 lg:h-52 relative my-2 robot-glow transition-transform duration-300 cursor-pointer" onclick="speakCurrentContext()">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl" role="img" aria-label="Robo Prof.ssa">
+                    <!-- Fiocco Rosa Sulla Testa -->
+                    <g id="robot-bow">
+                        <path d="M 65 10 C 50 0, 45 25, 75 25 Z" fill="#EC4899" stroke="#BE185D" stroke-width="3"/>
+                        <path d="M 135 10 C 150 0, 155 25, 125 25 Z" fill="#EC4899" stroke="#BE185D" stroke-width="3"/>
+                        <circle cx="100" cy="20" r="10" fill="#F472B6" stroke="#BE185D" stroke-width="3"/>
+                    </g>
+
+                    <!-- Antenna -->
+                    <rect x="94" y="24" width="12" height="16" fill="#94A3B8" rx="3"/>
+                    <circle id="robot-antenna-light" cx="100" cy="22" r="8" fill="#F43F5E" class="animate-pulse"/>
+
+                    <!-- Testa -->
+                    <rect x="35" y="36" width="130" height="90" fill="#8B5CF6" rx="28" stroke="#6D28D9" stroke-width="4"/>
+                    <rect x="46" y="46" width="108" height="70" fill="#0F172A" rx="20"/>
+
+                    <!-- Occhi -->
+                    <g id="robot-eyes">
+                        <circle id="eye-l" cx="72" cy="74" r="18" fill="#38BDF8"/>
+                        <circle cx="72" cy="74" r="14" fill="#0284C7"/>
+                        <circle cx="77" cy="69" r="6" fill="#FFFFFF"/>
+                        <circle cx="67" cy="79" r="3" fill="#FFFFFF"/>
+                        <path d="M 58 60 L 52 54 M 68 55 L 66 47 M 78 57 L 80 49" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
+
+                        <circle id="eye-r" cx="128" cy="74" r="18" fill="#38BDF8"/>
+                        <circle cx="128" cy="74" r="14" fill="#0284C7"/>
+                        <circle cx="133" cy="69" r="6" fill="#FFFFFF"/>
+                        <circle cx="123" cy="79" r="3" fill="#FFFFFF"/>
+                        <path d="M 142 60 L 148 54 M 132 55 L 134 47 M 122 57 L 120 49" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+
+                    <!-- Guance -->
+                    <circle cx="56" cy="94" r="8" fill="#FB7185" opacity="0.85"/>
+                    <circle cx="144" cy="94" r="8" fill="#FB7185" opacity="0.85"/>
+
+                    <!-- Bocca parlante -->
+                    <path id="robot-mouth" d="M 75 90 Q 100 98 125 90" fill="none" stroke="#F472B6" stroke-width="5" stroke-linecap="round"/>
+
+                    <!-- Corpo -->
+                    <path d="M 60 126 L 140 126 L 160 188 L 40 188 Z" fill="#EC4899" stroke="#BE185D" stroke-width="4"/>
+                    <circle cx="100" cy="152" r="15" fill="#FDE047"/>
+                    <text x="92" y="158" font-size="14" fill="#FFF" font-weight="bold">💖</text>
+                </svg>
+            </div>
+
+            <!-- Pulsanti Controllo Audio -->
+            <div class="w-full flex items-center justify-between gap-2 mt-2">
+                <button onclick="toggleMute()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-2xl border-2 border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                    <span id="mute-icon">🔊</span>
+                    <span id="mute-text">AUDIO ATTIVO</span>
+                </button>
+
+                <button onclick="speakCurrentContext()" class="bg-pink-100 hover:bg-pink-200 text-pink-900 p-3 rounded-2xl border-2 border-pink-200 font-black text-sm flex items-center justify-center gap-1 transition shadow animate-bounce-gentle" title="Ascolta di nuovo" aria-label="Ascolta di nuovo">
+                    <span class="text-lg leading-none">🔁</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- SEZIONE 1: RISCHI DELL'IA -->
+        <section id="section-stories" class="min-w-0 flex-1 bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-6 border-4 border-white shadow-xl flex flex-col justify-between relative overflow-hidden">
+            <div>
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-3 mb-3">
+                    <span id="story-step-badge" class="bg-amber-100 text-amber-900 font-black text-xs sm:text-sm px-3 py-1 rounded-full border border-amber-300">
+                        RISCHIO 1 DI 20
+                    </span>
+                    <button onclick="speakCurrentContext()" class="px-3 py-1 bg-amber-400 hover:bg-amber-500 text-amber-950 font-black text-xs rounded-full border border-amber-500 shadow flex items-center gap-1">
+                        <span>🔊</span>
+                        <span>ASCOLTA</span>
+                    </button>
+                </div>
+
+                <h2 id="story-title" class="text-xl sm:text-2xl font-black text-slate-800 mb-2">
+                    1. Phishing e Smishing (Truffe via Messaggio)
+                </h2>
+
+                <p id="story-description" class="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed mb-3">
+                </p>
+
+                <div id="story-svg-container" class="w-full bg-slate-100 rounded-2xl p-2 sm:p-3 border-2 border-slate-200 shadow-inner flex items-center justify-center my-1 cursor-pointer" onclick="speakCurrentContext()">
+                </div>
+            </div>
+
+            <!-- Griglia dei 20 rischi -->
+            <div class="mt-2">
+                <div class="text-xs font-bold text-slate-500 mb-1 flex justify-between items-center">
+                    <span>Scegli un rischio da approfondire:</span>
+                    <span class="text-indigo-600">20 tappe</span>
+                </div>
+
+                <div id="stories-grid-container" class="grid grid-cols-5 sm:grid-cols-10 gap-1.5 p-2 bg-slate-100/80 rounded-2xl border border-slate-200 max-h-[120px] overflow-y-auto no-scrollbar mb-2">
+                </div>
+
+                <div class="flex items-center justify-between gap-3 pt-2 border-t-2 border-slate-100">
+                    <button id="btn-story-prev" onclick="changeStorySlide(-1)" class="px-4 py-2 rounded-2xl font-black text-xs sm:text-sm bg-slate-200 text-slate-700 hover:bg-slate-300 disabled:opacity-40 transition flex items-center gap-2">
+                        <span>←</span>
+                        <span>INDIETRO</span>
+                    </button>
+
+                    <button onclick="openCuriosityModal()" class="px-3 sm:px-4 py-2 rounded-2xl font-black text-xs sm:text-sm bg-pink-100 text-pink-700 border-2 border-pink-300 hover:bg-pink-200 transition flex items-center gap-1.5 shadow">
+                        <span>🛡️</span>
+                        <span>COSA FARE</span>
+                    </button>
+
+                    <button id="btn-story-next" onclick="changeStorySlide(1)" class="px-4 py-2 rounded-2xl font-black text-xs sm:text-sm bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 transition flex items-center gap-2 shadow-lg">
+                        <span>AVANTI</span>
+                        <span>→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEZIONE 2: DETECTIVE VERO O FALSO -->
+        <section id="section-detector" class="hidden min-w-0 flex-1 bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-6 border-4 border-white shadow-xl flex-col justify-between relative overflow-hidden">
+            <div>
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-2 gap-2 flex-wrap">
+                    <h2 class="text-xl sm:text-2xl font-black text-indigo-950">
+                        Detective: vero o falso? 🔍
+                    </h2>
+                    <button onclick="speakDetectorContext()" class="px-3 py-1 bg-purple-600 text-white font-black text-xs rounded-full shadow flex items-center gap-1">
+                        <span>🔊</span>
+                        <span>ASCOLTA LE ISTRUZIONI</span>
+                    </button>
+                </div>
+
+                <p class="text-xs sm:text-sm font-bold text-indigo-600 mb-3">
+                    Analizza il caso con metodo: è autentico oppure è un falso (IA, truffa o disinformazione)?
+                </p>
+
+                <div class="bg-slate-50 border-4 border-indigo-100 rounded-2xl p-4 relative shadow-inner flex flex-col items-center">
+
+                    <div id="detector-case-visual" class="w-full bg-white border-2 border-slate-200 rounded-2xl p-4 min-h-[150px] flex flex-col items-center justify-center shadow-inner mb-3 relative overflow-hidden cursor-pointer" onclick="playCurrentDetectorAudio()">
+                    </div>
+
+                    <div id="detector-hint-box" class="bg-amber-100 border-2 border-amber-300 p-2.5 rounded-2xl text-amber-950 text-xs font-bold w-full text-center mb-3">
+                        💡 Metodo del detective: osserva i dettagli e verifica la fonte.
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                        <button onclick="answerDetector(true)" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white p-3 rounded-2xl font-black text-sm sm:text-base border-4 border-emerald-300 shadow-lg flex items-center justify-center gap-2 transition">
+                            <span class="text-2xl">✅</span>
+                            <span>AUTENTICO</span>
+                        </button>
+                        <button onclick="answerDetector(false)" class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white p-3 rounded-2xl font-black text-sm sm:text-base border-4 border-rose-300 shadow-lg flex items-center justify-center gap-2 transition">
+                            <span class="text-2xl">❌</span>
+                            <span>FALSO / TRUFFA</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="pt-2 text-center">
+                <span id="detector-score-tag" class="text-xs font-black text-purple-900 bg-purple-100 py-1 px-4 rounded-full border border-purple-200">
+                    Casi risolti: 0 / 6
+                </span>
+            </div>
+        </section>
+
+        <!-- SEZIONE 3: PALESTRA SCUDO -->
+        <section id="section-trainer" class="hidden min-w-0 flex-1 bg-white/90 backdrop-blur-md rounded-3xl p-3 sm:p-5 border-4 border-white shadow-xl flex-col justify-between relative overflow-hidden">
+
+            <div class="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-2 gap-2 flex-wrap">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button id="btn-subgame-sorting" onclick="switchLabSubGame('sorting')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border-2 border-indigo-700 shadow flex items-center gap-1.5 transition">
+                        <span>🗂️</span>
+                        <span>1. BUONE PRATICHE O RISCHI</span>
+                    </button>
+                    <button id="btn-subgame-shield" onclick="switchLabSubGame('shield')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-white text-indigo-900 border-2 border-indigo-200 hover:bg-indigo-50 flex items-center gap-1.5 transition">
+                        <span>🤝</span>
+                        <span>2. SCUDO DEL RISPETTO</span>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="resetActiveLabGame()" class="bg-rose-400 hover:bg-rose-500 text-white font-black px-3 py-1 rounded-xl text-xs flex items-center gap-1 shadow">
+                        <span>↻</span>
+                        <span>RICOMINCIA</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- GIOCO A: BUONE PRATICHE O RISCHI -->
+            <div id="subgame-sorting-container" class="flex-1 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-1 gap-2 flex-wrap">
+                    <span id="trainer-progress-text" class="text-xs font-black text-indigo-700 bg-indigo-100 px-3 py-1 rounded-full border border-indigo-200">
+                        Scenari valutati: 0 / 6
+                    </span>
+                    <button onclick="speakCurrentContext()" class="text-xs font-bold text-indigo-600 underline">
+                        🔊 Ascolta cosa fare
+                    </button>
+                </div>
+
+                <div class="flex-1 flex items-center justify-between gap-2 sm:gap-4 my-2 relative">
+                    <!-- CESTO SICURO -->
+                    <div id="safe-basket" class="basket-target flex-1 h-44 sm:h-52 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-3xl border-4 border-emerald-200 shadow-xl flex flex-col items-center justify-between p-2 relative">
+                        <div class="bg-white/90 px-3 py-1 rounded-full shadow text-xl sm:text-2xl flex items-center gap-1">
+                            <span>🛡️</span>
+                            <span id="safe-count-tag" class="text-xs font-black text-emerald-700">(0)</span>
+                        </div>
+                        <div id="safe-container" class="w-full flex-1 flex flex-wrap content-end justify-center gap-1 p-1 overflow-hidden"></div>
+                        <div class="w-full bg-emerald-800/70 rounded-xl py-1 text-center text-white font-black text-xs">
+                            BUONA PRATICA
+                        </div>
+                    </div>
+
+                    <div id="center-trainer-instruction" class="flex flex-col items-center justify-center text-center max-w-[120px] sm:max-w-[140px] z-10">
+                        <div class="text-3xl sm:text-4xl animate-bounce mb-1">👇</div>
+                        <span id="trainer-instruction-text" class="text-xs font-black text-slate-700 bg-amber-100 px-2 py-1 rounded-xl border border-amber-300">
+                            Trascina lo scenario nel cesto giusto, o toccalo.
+                        </span>
+                    </div>
+
+                    <!-- CESTO RISCHIO -->
+                    <div id="danger-basket" class="basket-target flex-1 h-44 sm:h-52 bg-gradient-to-b from-rose-400 to-rose-600 rounded-3xl border-4 border-rose-200 shadow-xl flex flex-col items-center justify-between p-2 relative">
+                        <div class="bg-white/90 px-3 py-1 rounded-full shadow text-xl sm:text-2xl flex items-center gap-1">
+                            <span>⚠️</span>
+                            <span id="danger-count-tag" class="text-xs font-black text-rose-800">(0)</span>
+                        </div>
+                        <div id="danger-container" class="w-full flex-1 flex flex-wrap content-end justify-center gap-1 p-1 overflow-hidden"></div>
+                        <div class="w-full bg-rose-800/70 rounded-xl py-1 text-center text-white font-black text-xs">
+                            RISCHIO / TRAPPOLA
+                        </div>
+                    </div>
+                </div>
+
+                <div id="conveyor-container" class="w-full min-h-[96px] sm:min-h-[112px] bg-slate-700 rounded-3xl border-4 border-slate-600 relative flex items-center justify-center shadow-2xl mt-2 overflow-hidden p-2">
+                    <div id="item-spawn" class="relative z-30 flex items-center justify-center w-full h-full cursor-pointer" onclick="speakCurrentItem()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- GIOCO B: SCUDO DEL RISPETTO -->
+            <div id="subgame-shield-container" class="hidden flex-1 flex-col justify-between">
+
+                <div class="bg-indigo-50 border-2 border-indigo-200 p-2 rounded-2xl mb-1 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl sm:text-3xl">🛡️🤝</span>
+                        <div>
+                            <h3 class="font-black text-xs sm:text-sm text-indigo-950">Lo Scudo del Rispetto</h3>
+                            <p class="text-[11px] font-bold text-indigo-700">Distingui il confronto rispettoso da aggressioni, ricatti e falsi. Quando serve: blocca, salva le prove, segnala.</p>
+                        </div>
+                    </div>
+                    <button onclick="speakShieldConcept()" class="bg-indigo-600 text-white font-black px-3 py-1.5 rounded-xl text-xs hover:bg-indigo-700 transition flex items-center gap-1 shrink-0">
+                        <span>🔊</span>
+                        <span>SPIEGAMI</span>
+                    </button>
+                </div>
+
+                <div class="flex-1 bg-slate-900 rounded-3xl p-3 border-4 border-indigo-300 shadow-inner flex flex-col items-center justify-center relative my-1 overflow-hidden min-h-[240px]">
+
+                    <div id="shield-item-card" class="bg-white border-4 border-purple-400 p-4 rounded-2xl text-center shadow-2xl max-w-sm w-full flex flex-col items-center gap-2 z-20 cursor-pointer" onclick="speakShieldMessage()">
+                        <span id="shield-item-emoji" class="text-5xl animate-bounce">💬</span>
+                        <p id="shield-item-text" class="text-sm font-black text-slate-800 leading-snug">
+                        </p>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-900 font-bold px-2 py-0.5 rounded-full">
+                            🔊 Tocca la scheda per ascoltare
+                        </span>
+                    </div>
+
+                    <div class="flex justify-center gap-3 mt-4 w-full max-w-sm z-20">
+                        <button onclick="answerShieldAction(false)" class="flex-1 bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-black text-xs py-3 px-2 rounded-2xl shadow-xl border-2 border-rose-300 flex flex-col items-center gap-1">
+                            <span class="text-2xl">🛡️</span>
+                            <span>BLOCCA E SEGNALA</span>
+                        </button>
+
+                        <button onclick="answerShieldAction(true)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-xs py-3 px-2 rounded-2xl shadow-xl border-2 border-emerald-300 flex flex-col items-center gap-1">
+                            <span class="text-2xl">🤝</span>
+                            <span>MESSAGGIO RISPETTOSO</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="mt-1 text-center">
+                    <p id="shield-progress-text" class="text-center text-xs font-black text-purple-900 bg-purple-100 py-1.5 px-3 rounded-xl border border-purple-200">
+                        Messaggi valutati: 0 / 5
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SEZIONE 4: GLOSSARIO PARLANTE -->
+        <section id="section-glossary" class="hidden min-w-0 flex-1 bg-white/90 backdrop-blur-md rounded-3xl p-4 sm:p-6 border-4 border-white shadow-xl flex-col justify-between relative overflow-hidden">
+            <div>
+                <div class="flex items-center justify-between border-b-2 border-slate-100 pb-2 mb-3 gap-2 flex-wrap">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">📖✨</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-indigo-950">
+                            Glossario di Robo Prof.ssa
+                        </h2>
+                    </div>
+                    <button onclick="speakGlossaryContext()" class="px-3 py-1 bg-pink-400 hover:bg-pink-500 text-pink-950 font-black text-xs rounded-full border border-pink-500 shadow flex items-center gap-1">
+                        <span>🔊</span>
+                        <span>SPIEGAMI IL GLOSSARIO</span>
+                    </button>
+                </div>
+
+                <p class="text-xs sm:text-sm font-bold text-slate-600 mb-3">
+                    Tocca un termine per leggerne la definizione e ascoltare la spiegazione di Robo Prof.ssa.
+                </p>
+
+                <div class="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                    <button id="btn-glossary-filter-all" onclick="filterGlossary('all')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow">
+                        TUTTI (20)
+                    </button>
+                    <button id="btn-glossary-filter-positive" onclick="filterGlossary('positive')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50">
+                        🛡️ DIFESE (10)
+                    </button>
+                    <button id="btn-glossary-filter-negative" onclick="filterGlossary('negative')" class="px-3 py-1.5 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50">
+                        ⚠️ RISCHI (10)
+                    </button>
+                </div>
+
+                <div id="glossary-buttons-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 max-h-[160px] sm:max-h-[190px] overflow-y-auto p-1 no-scrollbar">
+                </div>
+
+                <div id="glossary-detail-card" class="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-100 border-4 border-pink-300 rounded-3xl p-4 shadow-xl flex flex-col sm:flex-row items-center gap-4 relative overflow-hidden transition-all duration-300">
+                    <div id="glossary-term-icon" class="text-5xl sm:text-6xl p-3 bg-white rounded-2xl shadow-md border-2 border-pink-200 shrink-0 animate-bounce-gentle">
+                        🤖
+                    </div>
+
+                    <div class="flex-1 min-w-0 text-center sm:text-left">
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1 flex-wrap">
+                            <h3 id="glossary-term-title" class="text-lg sm:text-xl font-black text-indigo-950">
+                                Intelligenza Artificiale generativa
+                            </h3>
+                            <span id="glossary-term-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                🛡️ STRUMENTO
+                            </span>
+                        </div>
+
+                        <p id="glossary-term-desc" class="text-xs sm:text-sm font-semibold text-slate-700 leading-snug mb-2">
+                        </p>
+
+                        <button onclick="speakSelectedGlossaryTerm()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md transition inline-flex items-center gap-2">
+                            <span class="text-sm">🔊</span>
+                            <span>ASCOLTA LA SPIEGAZIONE</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 text-center">
+                <span class="text-[11px] font-bold text-slate-500">
+                    💡 Tocca un termine qualsiasi per ascoltare Robo Prof.ssa.
+                </span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALE: COSA FARE -->
+    <div id="curiosity-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border-4 border-pink-400 rounded-3xl p-5 max-w-lg w-full shadow-2xl flex flex-col items-center text-center relative">
+            <div class="bg-pink-100 text-pink-600 text-4xl p-3 rounded-2xl mb-2">🛡️</div>
+            <h3 id="modal-curiosity-title" class="text-lg sm:text-xl font-black text-slate-800 mb-2">Cosa fare</h3>
+            <p id="modal-curiosity-body" class="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed mb-4">
+            </p>
+
+            <button onclick="speakCuriosityModalText()" class="mb-4 px-4 py-2 bg-pink-100 hover:bg-pink-200 text-pink-900 border-2 border-pink-300 rounded-2xl font-black text-xs flex items-center gap-2 shadow transition">
+                <span class="text-base">🔊</span>
+                <span>ASCOLTA IL CONSIGLIO</span>
+            </button>
+
+            <button onclick="closeCuriosityModal()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black py-3 rounded-2xl text-sm shadow-md hover:brightness-110 transition">
+                CHIARO, GRAZIE PROF.SSA 🚀
+            </button>
         </div>
-      </div>
-    </section>
-  </main>
+    </div>
 
-  <footer class="panel foot">FrancescoPicca@2026 · Progetto didattico "Robo-Prof" · Intelligenza artificiale per studenti di 14–16 anni</footer>
+    <!-- MODALE VITTORIA -->
+    <div id="victory-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 text-center border-8 border-amber-300 shadow-2xl">
+            <div class="text-6xl mb-2 animate-bounce">🤖🛡️🎉</div>
+            <h2 id="victory-title" class="text-2xl sm:text-3xl font-black text-indigo-950 mb-2">LIVELLO COMPLETATO</h2>
+            <p id="victory-message" class="text-slate-600 font-semibold mb-4 text-sm sm:text-base">
+                Hai sviluppato metodo e occhio critico per riconoscere i rischi della rete e dell'IA.
+            </p>
+            <div id="victory-badge-desc" class="bg-amber-50 p-3 rounded-2xl border border-amber-200 text-xs font-bold text-amber-900 mb-5 leading-relaxed">
+                💡 Se qualcosa online ti mette a disagio o ti minaccia, non restare solo/a: parlane con un adulto di fiducia. Telefono Azzurro 19696 · Emergenza Infanzia 114 · Polizia Postale: commissariatodips.it
+            </div>
+            <button onclick="resetActiveLabGame()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-lg py-3.5 rounded-2xl shadow-xl hover:brightness-110 transition flex items-center justify-center gap-2">
+                <span>▶</span>
+                <span>RIGIOCA</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="w-full max-w-6xl mx-auto text-center py-2 px-3 text-xs font-bold text-indigo-900 bg-white/60 backdrop-blur-sm rounded-2xl border border-white">
+        🤖 Progetto Didattico "Robo Prof.ssa" • Sicurezza in Rete e IA per Ragazze e Ragazzi (14-16 anni) 🎀
+    </footer>
 </div>
-
-<!-- Approfondimento -->
-<div id="curiosity-modal" class="modal" hidden>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-curiosity-title">
-    <span class="kicker">Approfondimento</span>
-    <h3 id="modal-curiosity-title"></h3>
-    <p id="modal-curiosity-body" class="desc"></p>
-    <button class="btn primary big" onclick="closeCuriosityModal()">Ho capito</button>
-  </div>
-</div>
-
-<!-- Esito test -->
-<div id="victory-modal" class="modal" hidden>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="victory-title">
-    <span class="kicker">Esito del test</span>
-    <h3 id="victory-title"></h3>
-    <p id="victory-message" class="desc"></p>
-    <ul id="victory-results" class="results"></ul>
-    <div id="victory-badge-desc" class="note"></div>
-    <button class="btn primary big" onclick="resetActiveLabGame()">Allena di nuovo</button>
-  </div>
-</div>
-
 <script>
-/* ===== DATI: 18 TAPPE DELLA STORIA ===== */
-const svg = (inner, label) => `<svg viewBox="0 0 300 150" role="img" aria-label="${label}">${inner}</svg>`;
-const gridCells = (x, y, rows, step, r) => rows.map((row, i) => [...row].map((c, j) =>
-  `<circle cx="${x + j * step}" cy="${y + i * step}" r="${r}" class="${c === '1' ? 'fi' : 'fp'}" stroke="var(--ink)" stroke-width="1"/>`).join('')).join('');
+/* ============ DATI: 20 RISCHI (livello 14-16 anni) ============ */
 
-const HISTORY_SLIDES = [
-  { year: "1801", shortName: "Jacquard", tag: "Hardware e programmazione",
-    title: "Telaio di Jacquard",
-    description: "Joseph-Marie Jacquard presenta un telaio che legge schede di cartone forate: ogni foro decide se un filo viene sollevato o no. Il disegno del tessuto non è più nelle mani del tessitore ma in una sequenza di dati binari (foro / non foro). È il primo caso di istruzioni memorizzate su un supporto esterno e intercambiabile.",
-    speech: "1801, il telaio di Jacquard. Un foro o l'assenza di un foro: informazione binaria che comanda una macchina. Cambi la scheda e cambi il programma, senza modificare la macchina.",
-    curiosity: "Le schede di Jacquard ispirarono Babbage e, quasi un secolo dopo, Herman Hollerith, che le usò per il censimento americano del 1890. Da lì nasce l'azienda che diventerà IBM. Le schede perforate sono rimaste in uso per l'input dei computer fino agli anni '70.",
-    svg: svg(`<rect x="70" y="18" width="160" height="114" rx="6" class="fs ln"/>${gridCells(95, 42, ['10110100','01001011','11010010','00111001'], 16, 4.5)}<text x="150" y="124" text-anchor="middle" class="tx sm mt">scheda perforata: 1 = foro, 0 = pieno</text>`, "Scheda perforata") },
-
-  { year: "1837", shortName: "Babbage", tag: "Hardware e programmazione",
-    title: "Analytical Engine di Babbage",
-    description: "Charles Babbage progetta una macchina meccanica a vapore con un'unità di calcolo (il \"mulino\"), una memoria (il \"magazzino\") e schede per l'input, mutuate da Jacquard. Ha già l'architettura di un computer moderno: CPU, RAM e programma esterno, compresi salti condizionati e cicli.",
-    speech: "1837, Babbage progetta la macchina analitica. Un mulino per calcolare, un magazzino per memorizzare, schede per programmare: la stessa architettura dei computer di oggi.",
-    curiosity: "La macchina non fu mai completata: i mezzi di precisione dell'epoca e i finanziamenti non bastavano. Nel 1991 il Science Museum di Londra ha costruito la sua Difference Engine n. 2 seguendo i disegni originali, e funziona.",
-    svg: svg(`<g class="spin"><circle cx="105" cy="75" r="42" class="ln" stroke-width="9" stroke-dasharray="7 6"/><circle cx="105" cy="75" r="30" class="ln acc"/><circle cx="105" cy="75" r="6" class="fa"/></g><g class="spin rev"><circle cx="187" cy="75" r="30" class="ln" stroke-width="9" stroke-dasharray="7 6"/><circle cx="187" cy="75" r="20" class="ln wrn"/><circle cx="187" cy="75" r="5" class="fw"/></g><text x="150" y="140" text-anchor="middle" class="tx sm mt">mulino (calcolo) + magazzino (memoria)</text>`, "Ingranaggi") },
-
-  { year: "1843", shortName: "Ada Lovelace", tag: "Teoria",
-    title: "Ada Lovelace e il primo algoritmo",
-    description: "Nelle sue note alla traduzione di un articolo sulla macchina di Babbage, Ada Lovelace descrive passo per passo come calcolare i numeri di Bernoulli: è considerato il primo programma pensato per un calcolatore. Soprattutto intuisce che la macchina potrebbe manipolare qualsiasi simbolo, non solo numeri, per esempio note musicali.",
-    speech: "1843, Ada Lovelace. Scrive il primo algoritmo per una macchina di calcolo e capisce che i simboli possono rappresentare altro dai numeri, come musica o immagini. Ma sostiene anche che la macchina non crea nulla di nuovo da sola.",
-    curiosity: "Nelle Note Ada scrive che la macchina \"non ha pretese di creare nulla\": fa solo ciò che sappiamo ordinarle. Turing, nel 1950, discuterà proprio questa obiezione, chiamandola \"obiezione di Lady Lovelace\". Se ne parla ancora a proposito dell'IA generativa.",
-    svg: svg(`<rect x="60" y="14" width="180" height="122" rx="8" class="fp ln"/><text x="76" y="40" class="tx ac">Nota G · numeri di Bernoulli</text><text x="76" y="62" class="tx">per n = 1 ... 7:</text><text x="90" y="80" class="tx">V4 ← V2 × V3</text><text x="90" y="96" class="tx">V5 ← V4 ÷ V1</text><text x="90" y="112" class="tx">se V6 ≠ 0 ripeti</text>`, "Pseudocodice") },
-
-  { year: "1936", shortName: "Turing", tag: "Teoria",
-    title: "Macchina universale di Turing",
-    description: "Alan Turing definisce un modello astratto: un nastro infinito di simboli, una testina che legge e scrive, un insieme finito di stati. Dimostra che una sola macchina \"universale\" può simulare qualunque altra se riceve la sua descrizione sul nastro. Nasce l'idea di programma come dato, e con essa la nozione precisa di ciò che è calcolabile.",
-    speech: "1936, Turing. Una macchina astratta con nastro e testina che può eseguire qualunque algoritmo. Il programma è un dato come gli altri: è l'idea alla base di ogni computer.",
-    curiosity: "Nello stesso lavoro Turing mostra anche che esistono problemi non calcolabili, come il problema della terminazione: nessun programma può stabilire, per ogni altro programma, se prima o poi si fermerà. Un limite teorico che vale anche per l'IA.",
-    svg: svg(`<g>${[0,1,2,3,4,5,6].map(i => `<rect x="${30 + i * 36}" y="78" width="36" height="34" class="fp ln"/><text x="${48 + i * 36}" y="101" text-anchor="middle" class="tx lg">${'1011010'[i]}</text>`).join('')}</g><path d="M138 70 L138 52" class="ln wrn"/><path d="M128 60 L138 72 L148 60 Z" class="fw"/><rect x="118" y="26" width="40" height="22" rx="4" class="fa"/><text x="138" y="41" text-anchor="middle" class="tx on">q0</text><text x="150" y="134" text-anchor="middle" class="tx sm mt">nastro + testina + stato</text>`, "Nastro di Turing") },
-
-  { year: "1950", shortName: "Test di Turing", tag: "Filosofia",
-    title: "Test di Turing",
-    description: "Nell'articolo \"Computing Machinery and Intelligence\" Turing propone di sostituire la domanda \"le macchine possono pensare?\" con un gioco: un giudice dialoga per iscritto con una persona e con una macchina senza sapere chi è chi. Se non riesce a distinguerli in modo affidabile, la macchina ha superato il test. Il criterio è comportamentale, non dice nulla su coscienza o comprensione.",
-    speech: "1950, il gioco dell'imitazione. Se un giudice, chattando, non distingue la macchina dalla persona, allora la macchina supera il test. Resta aperta la domanda se questo basti a dire che capisce davvero.",
-    curiosity: "Oggi i grandi modelli linguistici producono testi spesso indistinguibili da quelli umani, ma molti ricercatori pensano che il test misuri la capacità di imitare più che l'intelligenza. Il filosofo John Searle, con la \"stanza cinese\", sostenne che manipolare simboli non equivale a comprenderli.",
-    svg: svg(`<rect x="30" y="20" width="70" height="46" rx="8" class="fs ln"/><text x="65" y="48" text-anchor="middle" class="tx lg">A</text><rect x="30" y="84" width="70" height="46" rx="8" class="fs ln"/><text x="65" y="112" text-anchor="middle" class="tx lg">B</text><rect x="190" y="52" width="82" height="46" rx="8" class="fa"/><text x="231" y="80" text-anchor="middle" class="tx on lg">Giudice</text><path d="M100 43 L190 66 M100 107 L190 84" class="ln mt" stroke-dasharray="5 4"/><text x="145" y="30" class="tx sm wn">chi è la macchina?</text>`, "Test di Turing") },
-
-  { year: "1956", shortName: "Dartmouth", tag: "Nascita della disciplina",
-    title: "Conferenza di Dartmouth",
-    description: "Nell'estate del 1956, in un college del New Hampshire, John McCarthy, Marvin Minsky, Nathaniel Rochester e Claude Shannon organizzano un workshop di due mesi. Nella proposta compare per la prima volta l'espressione \"artificial intelligence\". L'ipotesi di partenza è che ogni aspetto dell'apprendimento e dell'intelligenza possa essere descritto con tanta precisione da poterlo simulare con una macchina.",
-    speech: "1956, Dartmouth. Qui nasce il nome intelligenza artificiale e nasce la disciplina. Gli organizzatori pensavano di fare progressi decisivi in un'estate. Si sbagliavano di parecchi decenni.",
-    curiosity: "La proposta chiedeva fondi per un gruppo di dieci persone e due mesi di lavoro. Fu un'enorme sottostima, tipica di ogni ondata di entusiasmo sull'IA: gli obiettivi si rivelavano più difficili del previsto, e da qui nascono i cicli di entusiasmo e delusione.",
-    svg: svg(`<rect x="40" y="22" width="220" height="106" rx="10" class="fp ln"/><text x="150" y="56" text-anchor="middle" class="tx lg ac">DARTMOUTH · 1956</text><text x="150" y="80" text-anchor="middle" class="tx">Summer Research Project</text><text x="150" y="96" text-anchor="middle" class="tx">on Artificial Intelligence</text><text x="150" y="116" text-anchor="middle" class="tx sm mt">McCarthy · Minsky · Rochester · Shannon</text>`, "Dartmouth") },
-
-  { year: "1957", shortName: "Perceptron", tag: "Reti neurali",
-    title: "Perceptron di Rosenblatt",
-    description: "Frank Rosenblatt realizza il primo neurone artificiale che apprende: somma i suoi ingressi moltiplicati per pesi, e se la somma supera una soglia dà in uscita 1, altrimenti 0. Se sbaglia, corregge i pesi. Può imparare a separare due classi, ma solo se sono separabili da una retta (nel 1969 Minsky e Papert ne mostrano i limiti, per esempio con la funzione XOR).",
-    speech: "1957, il Perceptron. Ingressi, pesi, somma, soglia. Se l'uscita è sbagliata, i pesi vengono corretti. È l'antenato di ogni rete neurale, ma da solo non sa risolvere problemi non lineari come lo XOR.",
-    curiosity: "Il Mark I Perceptron era una macchina vera, con una matrice di 400 fotocellule come retina e pesi implementati da potenziometri motorizzati. La stampa dell'epoca annunciò che presto avrebbe \"camminato, parlato e preso coscienza di sé\".",
-    svg: svg(`<circle cx="50" cy="32" r="14" class="fs ln"/><text x="50" y="36" text-anchor="middle" class="tx">x1</text><circle cx="50" cy="75" r="14" class="fs ln"/><text x="50" y="79" text-anchor="middle" class="tx">x2</text><circle cx="50" cy="118" r="14" class="fs ln"/><text x="50" y="122" text-anchor="middle" class="tx">x3</text><path d="M64 34 L146 70 M64 75 L136 75 M64 116 L146 80" class="ln mt"/><text x="94" y="46" class="tx sm wn">w1</text><text x="90" y="70" class="tx sm wn">w2</text><text x="94" y="108" class="tx sm wn">w3</text><circle cx="165" cy="75" r="22" class="fa"/><text x="165" y="80" text-anchor="middle" class="tx on lg">Σ</text><path d="M187 75 L225 75" class="ln"/><rect x="225" y="58" width="52" height="34" rx="6" class="fp ln"/><text x="251" y="80" text-anchor="middle" class="tx">y ∈ {0,1}</text>`, "Perceptron") },
-
-  { year: "1966", shortName: "ELIZA", tag: "Linguaggio",
-    title: "ELIZA, il primo chatbot",
-    description: "Joseph Weizenbaum, al MIT, scrive ELIZA. Con lo script DOCTOR imita uno psicoterapeuta rogersiano: cerca parole chiave nella frase dell'utente e la riformula con regole di sostituzione (\"Mi sento triste\" → \"Perché ti senti triste?\"). Non c'è alcuna comprensione, solo pattern matching.",
-    speech: "1966, ELIZA. Un programma con poche regole di riscrittura che sembrava ascoltare. Non capiva nulla, ma molte persone si confidavano con lui. Si chiama effetto ELIZA.",
-    curiosity: "Weizenbaum rimase turbato: la sua segretaria gli chiese di uscire dalla stanza per parlare in privato con il programma. Divenne uno dei primi critici dell'uso acritico dell'IA, e il suo libro \"Computer Power and Human Reason\" (1976) è ancora citato nei dibattiti sull'etica.",
-    svg: svg(`<rect x="30" y="16" width="240" height="118" rx="8" fill="var(--stage)" stroke="var(--stage-line)" stroke-width="2"/><text x="44" y="42" font-family="var(--font-mono)" font-size="11" fill="#7ce3a8">ELIZA&gt; Come ti senti oggi?</text><text x="44" y="68" font-family="var(--font-mono)" font-size="11" fill="#8ab4ff">TU&gt; Mi sento ansioso per l'esame.</text><text x="44" y="94" font-family="var(--font-mono)" font-size="11" fill="#7ce3a8">ELIZA&gt; Perché ti senti ansioso</text><text x="44" y="108" font-family="var(--font-mono)" font-size="11" fill="#7ce3a8">        per l'esame?</text>`, "Terminale ELIZA") },
-
-  { year: "1974–1990", shortName: "Inverni dell'IA", tag: "Sistemi esperti",
-    title: "Sistemi esperti e inverni dell'IA",
-    description: "Negli anni '70 e '80 domina l'IA simbolica: sistemi esperti come MYCIN (diagnosi di infezioni) e XCON (configurazione di computer) codificano la conoscenza di specialisti in migliaia di regole \"se... allora\". Funzionano in ambiti ristretti, ma sono costosi da mantenere e fragili fuori dal loro dominio. Dopo il rapporto Lighthill (1973) e il crollo del mercato delle macchine LISP, i finanziamenti calano: sono i due \"inverni dell'IA\".",
-    speech: "Anni settanta e ottanta. I sistemi esperti funzionano solo dove le regole si possono scrivere a mano. Quando le promesse superano i risultati, arrivano i tagli ai fondi: sono gli inverni dell'IA.",
-    curiosity: "Il problema di fondo è il collo di bottiglia dell'acquisizione della conoscenza: gli esperti sanno fare cose che non sanno spiegare in regole. L'apprendimento dai dati, che rimpiazzerà le regole scritte a mano, è la risposta che arriverà dopo.",
-    svg: svg(`<path d="M30 118 L270 118 M30 118 L30 20" class="ln mt thin"/><path d="M30 108 C60 70 80 40 105 36 C122 62 132 100 142 106 C165 80 185 36 205 30 C225 60 235 104 262 112" class="ln acc" stroke-width="2.6"/><text x="104" y="132" text-anchor="middle" class="tx sm wn">inverno 1974</text><text x="232" y="132" text-anchor="middle" class="tx sm wn">inverno 1987</text><text x="36" y="26" class="tx sm mt">aspettative e fondi</text>`, "Grafico aspettative") },
-
-  { year: "1986", shortName: "Backpropagation", tag: "Reti neurali",
-    title: "Backpropagation",
-    description: "Rumelhart, Hinton e Williams mostrano che una rete a più strati si può addestrare propagando l'errore all'indietro: con la regola della catena si calcola quanto ciascun peso ha contribuito all'errore finale, e lo si corregge di poco nella direzione che lo riduce (discesa del gradiente). Il metodo era già stato scoperto in precedenza, ma è questo lavoro a renderlo noto.",
-    speech: "1986, la retropropagazione dell'errore. Si calcola l'errore in uscita e lo si distribuisce all'indietro, strato dopo strato, per sapere di quanto correggere ogni peso. Con la discesa del gradiente la rete impara.",
-    curiosity: "Il cuore matematico è la regola della catena: se l'errore E dipende da un peso w attraverso più funzioni composte, la derivata di E rispetto a w è il prodotto delle derivate lungo il percorso. Tutti i framework moderni (PyTorch, TensorFlow) la calcolano automaticamente.",
-    svg: svg(`${[[50,45],[50,105],[130,30],[130,75],[130,120],[210,45],[210,105],[262,75]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="11" class="fs ln"/>`).join('')}<path d="M61 45 L119 30 M61 45 L119 75 M61 105 L119 75 M61 105 L119 120 M141 30 L199 45 M141 75 L199 45 M141 75 L199 105 M141 120 L199 105 M221 45 L251 75 M221 105 L251 75" class="ln mt thin"/><path d="M245 138 L70 138" class="ln bd"/><path d="M78 133 L68 138 L78 143" class="ln bd"/><text x="156" y="132" text-anchor="middle" class="tx sm wn">errore propagato all'indietro</text>`, "Rete neurale") },
-
-  { year: "1997", shortName: "Deep Blue", tag: "Ricerca e giochi",
-    title: "Deep Blue batte Kasparov",
-    description: "Il computer IBM Deep Blue vince un match di sei partite contro Garry Kasparov, campione del mondo di scacchi (3,5 a 2,5). Non impara: usa la ricerca nell'albero delle mosse, una funzione di valutazione scritta da esperti e hardware dedicato che esamina circa 200 milioni di posizioni al secondo.",
-    speech: "1997, Deep Blue sconfigge Kasparov a scacchi. Non è apprendimento: è forza bruta ben organizzata, con una funzione di valutazione scritta a mano ed hardware specializzato.",
-    curiosity: "Nel 1996 Kasparov aveva vinto il primo match. Nel 1997 una mossa di Deep Blue lo sconcertò al punto da sospettare un intervento umano. Anni dopo si scoprì che era stato un malfunzionamento del programma, che aveva scelto una mossa a caso.",
-    svg: svg(`${[0,1,2,3,4,5].map(r => [0,1,2,3,4,5].map(c => `<rect x="${60 + c * 24}" y="${12 + r * 22}" width="24" height="22" class="${(r + c) % 2 ? 'fm' : 'fp'}" opacity="${(r + c) % 2 ? .45 : 1}"/>`).join('')).join('')}<rect x="60" y="12" width="144" height="132" class="ln thin"/><text x="144" y="98" text-anchor="middle" font-size="26" class="fi">♚</text><text x="236" y="70" class="tx lg ac">2·10⁸</text><text x="224" y="86" class="tx sm mt">posizioni/s</text>`, "Scacchiera") },
-
-  { year: "2012", shortName: "AlexNet", tag: "Deep learning",
-    title: "AlexNet e la svolta del deep learning",
-    description: "Alex Krizhevsky, Ilya Sutskever e Geoffrey Hinton vincono la gara ImageNet con una rete convoluzionale profonda addestrata su due GPU. L'errore top-5 scende a circa 15,3%, contro il 26,2% del secondo classificato. Tre ingredienti insieme: molti dati etichettati (ImageNet), potenza di calcolo (GPU) e algoritmi migliorati (ReLU, dropout).",
-    speech: "2012, AlexNet. Una rete convoluzionale profonda, addestrata su schede grafiche, riduce l'errore di classificazione delle immagini di quasi dieci punti rispetto al secondo. Dati, calcolo e algoritmi insieme: da qui parte il deep learning.",
-    curiosity: "ImageNet contiene oltre 14 milioni di immagini etichettate, in gran parte da lavoratori su piattaforme di crowdsourcing. La qualità e la rappresentatività delle etichette sono diventate un tema centrale: i pregiudizi nei dati diventano pregiudizi nel modello.",
-    svg: svg(`<path d="M40 122 L270 122" class="ln mt thin"/><rect x="70" y="${122 - 26.2 * 3.4}" width="60" height="${26.2 * 3.4}" class="fm" opacity=".55"/><rect x="170" y="${122 - 15.3 * 3.4}" width="60" height="${15.3 * 3.4}" class="fa"/><text x="100" y="${118 - 26.2 * 3.4}" text-anchor="middle" class="tx lg">26,2%</text><text x="200" y="${118 - 15.3 * 3.4}" text-anchor="middle" class="tx lg ac">15,3%</text><text x="100" y="138" text-anchor="middle" class="tx sm mt">2° classificato</text><text x="200" y="138" text-anchor="middle" class="tx sm mt">AlexNet</text><text x="150" y="14" text-anchor="middle" class="tx sm mt">errore top-5 · ImageNet 2012</text>`, "Confronto errore") },
-
-  { year: "2016", shortName: "AlphaGo", tag: "Apprendimento per rinforzo",
-    title: "AlphaGo batte Lee Sedol",
-    description: "AlphaGo, di DeepMind, vince 4 a 1 contro Lee Sedol, uno dei più forti giocatori di Go. Il Go ha circa 10¹⁷⁰ posizioni possibili, troppe per la forza bruta. AlphaGo combina reti neurali (che stimano le mosse migliori e chi sta vincendo), ricerca ad albero Monte Carlo e apprendimento per rinforzo giocando contro se stesso.",
-    speech: "2016, AlphaGo batte il campione Lee Sedol. Il Go è troppo vasto per la forza bruta. AlphaGo ha imparato giocando milioni di partite contro se stesso e ricevendo un premio solo per la vittoria.",
-    curiosity: "Nella seconda partita AlphaGo giocò la \"mossa 37\", giudicata improbabile da qualunque esperto, che si rivelò decisiva. Lee Sedol, nella quarta partita, trovò a sua volta una mossa creativa e vinse l'unica partita umana del match.",
-    svg: svg(`<rect x="75" y="12" width="150" height="126" rx="6" class="fs ln"/>${[0,1,2,3,4].map(i => `<path d="M${95 + i * 27.5} 28 L${95 + i * 27.5} 122 M92 ${32 + i * 22.5} L208 ${32 + i * 22.5}" class="ln thin"/>`).join('')}<circle cx="122.5" cy="54.5" r="9" class="fi"/><circle cx="150" cy="77" r="9" class="fp ln"/><circle cx="150" cy="99.5" r="9" class="fi"/><circle cx="177.5" cy="77" r="9" class="fi"/><circle cx="122.5" cy="99.5" r="9" class="fp ln"/>`, "Goban") },
-
-  { year: "2017", shortName: "Transformer", tag: "Linguaggio",
-    title: "Transformer: l'attenzione basta",
-    description: "Un gruppo di ricercatori di Google pubblica \"Attention Is All You Need\". L'architettura Transformer abbandona le reti ricorrenti: usa il meccanismo di self-attention, per cui ogni parola calcola quanto deve \"guardare\" ciascuna delle altre nella frase. Si elaborano tutte le parole in parallelo, e questo permette di addestrare modelli enormi su GPU.",
-    speech: "2017, il Transformer. Con l'auto-attenzione ogni parola pesa la rilevanza di tutte le altre. Il calcolo è parallelizzabile e quindi scala: è la base dei modelli linguistici attuali.",
-    curiosity: "Nella frase \"Il gatto non è salito sul divano perché era stanco\", l'attenzione serve a collegare \"era stanco\" a \"gatto\" e non a \"divano\". Lo stesso meccanismo è usato oggi anche per immagini, audio, proteine e codice.",
-    svg: svg(`${['Il','gatto','non','salì','perché','era','stanco'].map((w, i) => `<text x="${24 + i * 38}" y="118" text-anchor="middle" class="tx">${w}</text>`).join('')}<path d="M252 106 C210 20 90 20 62 106" class="ln acc" stroke-width="3"/><path d="M252 106 C230 70 190 70 176 106" class="ln mt thin"/><path d="M252 106 C250 80 238 80 214 106" class="ln mt thin"/><text x="150" y="26" text-anchor="middle" class="tx sm ac">stanco → gatto: attenzione alta</text>`, "Attenzione") },
-
-  { year: "2018", shortName: "BERT e GPT", tag: "Linguaggio",
-    title: "BERT e GPT",
-    description: "Nel 2018 due approcci diversi al pre-addestramento: GPT (OpenAI) impara a predire la parola successiva leggendo solo da sinistra a destra, ed è adatto a generare testo; BERT (Google) impara a ricostruire parole mascherate guardando il contesto da entrambi i lati, ed è adatto a comprendere il testo. Poi i modelli si specializzano (fine-tuning) su compiti precisi.",
-    speech: "2018, BERT e GPT. Pre-addestramento su enormi quantità di testo: GPT predice la parola successiva, BERT ricostruisce parole nascoste usando il contesto. Poi si adattano ai compiti specifici.",
-    curiosity: "Il pre-addestramento è auto-supervisionato: le etichette sono ricavate dal testo stesso (la parola nascosta è la risposta), quindi non servono annotatori umani. È la ragione per cui si possono usare miliardi di pagine web.",
-    svg: svg(`<rect x="20" y="20" width="125" height="110" rx="8" class="fs ln"/><text x="82" y="42" text-anchor="middle" class="tx lg ac">BERT</text><text x="82" y="68" text-anchor="middle" class="tx sm">Il gatto [MASK]</text><text x="82" y="82" text-anchor="middle" class="tx sm">sul divano</text><text x="82" y="108" text-anchor="middle" class="tx sm wn">[MASK] = dorme</text><rect x="155" y="20" width="125" height="110" rx="8" class="fp ln"/><text x="217" y="42" text-anchor="middle" class="tx lg">GPT</text><text x="217" y="68" text-anchor="middle" class="tx sm">Il gatto dorme</text><text x="217" y="82" text-anchor="middle" class="tx sm">sul ...</text><text x="217" y="108" text-anchor="middle" class="tx sm wn">successiva: divano</text>`, "BERT e GPT") },
-
-  { year: "2020", shortName: "GPT-3", tag: "Modelli di grande scala",
-    title: "GPT-3 e i modelli di grande scala",
-    description: "GPT-3 ha 175 miliardi di parametri ed è addestrato su centinaia di miliardi di parole. Il risultato sorprendente è l'apprendimento in contesto: basta mostrare nel prompt pochi esempi di un compito (few-shot) perché il modello lo continui, senza modificare i pesi. Si osservano leggi di scala: più parametri, dati e calcolo portano miglioramenti regolari.",
-    speech: "2020, GPT-3. Centosettantacinque miliardi di parametri. Mostrandogli qualche esempio nel prompt, il modello capisce il compito senza essere riaddestrato. Più grande è il modello, più capacità emergono.",
-    curiosity: "Il costo stimato dell'addestramento fu di milioni di dollari. L'impatto ambientale e la concentrazione di risorse in poche aziende hanno aperto un dibattito: i modelli di frontiera possono essere costruiti solo da chi dispone di grandi capacità di calcolo.",
-    svg: svg(`<circle cx="70" cy="75" r="52" class="fs ln"/><text x="70" y="72" text-anchor="middle" class="tx lg ac">175 mld</text><text x="70" y="90" text-anchor="middle" class="tx sm mt">parametri</text><rect x="140" y="24" width="140" height="102" rx="8" class="fp ln"/><text x="150" y="46" class="tx sm mt">prompt (few-shot)</text><text x="150" y="66" class="tx sm">mare → sea</text><text x="150" y="82" class="tx sm">cane → dog</text><text x="150" y="98" class="tx sm">casa → ?</text><text x="150" y="116" class="tx sm wn">modello: house</text>`, "GPT-3") },
-
-  { year: "2022", shortName: "ChatGPT", tag: "IA generativa",
-    title: "ChatGPT e l'IA generativa di massa",
-    description: "A novembre 2022 OpenAI rende disponibile ChatGPT: un modello linguistico rifinito con RLHF (apprendimento per rinforzo con feedback umano), cioè con persone che classificano le risposte per renderle più utili e sicure. Per la prima volta un modello potente è accessibile a chiunque con una semplice chat. Compaiono anche i problemi: allucinazioni (risposte false ma plausibili), plagio, bias.",
-    speech: "2022, ChatGPT. Un modello linguistico reso più utile con il feedback umano, utilizzabile da chiunque in una chat. Ha reso evidente sia il potenziale sia i limiti: può inventare risposte false con grande sicurezza.",
-    curiosity: "Raggiunse un milione di utenti in cinque giorni e, secondo le stime del periodo, circa 100 milioni in due mesi: una crescita più rapida di qualsiasi applicazione precedente. Da allora verificare le fonti di ciò che produce un'IA è una competenza di base.",
-    svg: svg(`<path d="M30 122 L270 122 M30 122 L30 18" class="ln mt thin"/><path d="M30 120 C100 118 150 112 200 84 C230 66 250 44 266 22" class="ln acc" stroke-width="3"/><circle cx="108" cy="116" r="5" class="fw"/><text x="116" y="108" class="tx sm">5 giorni: 1 milione</text><circle cx="262" cy="26" r="5" class="fw"/><text x="258" y="44" text-anchor="end" class="tx sm">~2 mesi: 100 milioni</text><text x="150" y="140" text-anchor="middle" class="tx sm mt">utenti nel tempo (schema)</text>`, "Crescita utenti") },
-
-  { year: "2023–2026", shortName: "Multimodale e agenti", tag: "Oggi",
-    title: "Modelli multimodali e agenti",
-    description: "I modelli attuali elaborano insieme testo, immagini, audio e video, e i più recenti sono addestrati a \"ragionare\" prima di rispondere. Gli agenti collegano il modello a strumenti (ricerca, codice, applicazioni) e lo lasciano pianificare ed eseguire compiti in più passaggi. Aumentano utilità e rischi, e la regolazione si struttura: l'AI Act europeo è entrato in vigore nel 2024 con obblighi graduali.",
-    speech: "Dal 2023 a oggi: modelli multimodali che trattano testo, immagini e audio, modelli che ragionano a più passaggi, e agenti che usano strumenti. Con più autonomia crescono anche le questioni di affidabilità, privacy e responsabilità.",
-    curiosity: "L'AI Act dell'Unione Europea classifica i sistemi per livello di rischio: alcune pratiche sono vietate, altre (come l'IA usata per selezionare personale o valutare studenti) sono ad alto rischio e richiedono controlli. Capire come funziona l'IA è anche una competenza di cittadinanza.",
-    svg: svg(`<circle cx="150" cy="75" r="30" class="fa"/><text x="150" y="80" text-anchor="middle" class="tx on lg">modello</text>${[[48,30,'testo'],[252,30,'immagini'],[48,122,'audio'],[252,122,'strumenti']].map(([x,y,t]) => `<path d="M150 75 L${x} ${y}" class="ln mt" stroke-dasharray="4 4"/><rect x="${x - 36}" y="${y - 13}" width="72" height="26" rx="6" class="fp ln"/><text x="${x}" y="${y + 4}" text-anchor="middle" class="tx sm">${t}</text>`).join('')}`, "Modello multimodale") }
-];
-HISTORY_SLIDES.forEach((s, i) => { s.id = i + 1; });
-
-/* ===== DATI: MACHINE LEARNING ===== */
-const ML_TABS = [
-  { kicker: "TIPO A", title: "Apprendimento supervisionato", subtitle: "Dati etichettati · risposte note",
-    description: "Il modello riceve esempi già etichettati: coppie (input, risposta corretta). Confronta la propria previsione con l'etichetta, misura l'errore con una funzione di perdita e aggiusta i parametri per ridurlo. Per sapere se ha davvero imparato, si valuta su un test set di esempi mai visti, altrimenti si rischia l'overfitting, cioè la memorizzazione dei dati di addestramento.",
-    terms: ["classificazione", "regressione", "etichetta", "funzione di perdita", "train / test split", "overfitting"],
-    speech: "Apprendimento supervisionato: il modello vede esempi con la risposta corretta e riduce l'errore tra previsione ed etichetta. Poi lo si valuta su dati che non ha mai visto.",
-    btnText: "Addestra il classificatore", visualType: "supervised" },
-  { kicker: "TIPO B", title: "Apprendimento non supervisionato", subtitle: "Dati senza etichette · struttura nascosta",
-    description: "Qui non esistono risposte corrette. Il modello cerca regolarità nei dati: gruppi di elementi simili (clustering), direzioni lungo cui i dati variano di più (riduzione della dimensionalità), anomalie. Con l'algoritmo k-means, per esempio, si scelgono k centri e si assegna ogni punto al più vicino, poi si ricalcolano i centri finché non si stabilizzano.",
-    terms: ["clustering", "k-means", "distanza", "centroide", "riduzione dimensionale", "anomalie"],
-    speech: "Apprendimento non supervisionato: nessuna etichetta. Il modello cerca da solo gruppi di dati simili, per esempio con l'algoritmo k-means. Il significato dei gruppi però lo deve interpretare una persona.",
-    btnText: "Esegui k-means con k = 3", visualType: "unsupervised" },
-  { kicker: "TIPO C", title: "Apprendimento per rinforzo", subtitle: "Agente · ambiente · ricompensa",
-    description: "Un agente osserva uno stato, sceglie un'azione, e l'ambiente risponde con un nuovo stato e una ricompensa (positiva o negativa). L'obiettivo è una politica che massimizzi la ricompensa totale nel tempo. All'inizio l'agente esplora azioni a caso, poi sfrutta ciò che ha imparato: il compromesso tra esplorazione e sfruttamento è il problema centrale.",
-    terms: ["agente", "stato", "azione", "ricompensa", "politica", "esplorazione vs sfruttamento"],
-    speech: "Apprendimento per rinforzo: un agente prova azioni e riceve ricompense o penalità. Con molti episodi impara una politica che massimizza la ricompensa totale. All'inizio esplora, poi sfrutta ciò che ha imparato.",
-    btnText: "Esegui un episodio di training", visualType: "reinforcement" }
-];
-
-/* ===== DATI: LABORATORIO ===== */
-const FLAGS = { S: "Mittente sconosciuto", L: "Link abbreviato", U: "Tono urgente", C: "Chiede dati o pagamento" };
-const TRAIN_MSGS = [
-  { from: "Numero sconosciuto", text: "Il tuo pacco è bloccato. Paga 1,99 € su bit.ly/p4cco entro oggi.", f: "SLU", label: "spam" },
-  { from: "Marco (in rubrica)", text: "Ci vediamo alle 5 in palestra?", f: "", label: "ok" },
-  { from: "Mittente sconosciuto", text: "Hai vinto uno smartphone! Conferma nome e IBAN entro 1 ora.", f: "SUC", label: "spam" },
-  { from: "Prof. Bianchi (in rubrica)", text: "Compito di matematica: pag. 112, es. 4–9, per giovedì.", f: "", label: "ok" },
-  { from: "\"Servizi bancari\"", text: "Accesso sospetto al conto. Inserisci subito la password: tinyurl.com/b4nca", f: "SLUC", label: "spam" },
-  { from: "Segreteria scuola", text: "Ultimo avviso: iscrizione alla gita entro stasera, poi si chiude.", f: "U", label: "ok" }
-];
-const TEST_MSGS = [
-  { from: "Mittente sconosciuto", text: "Hai vinto un buono! Clicca su cutt.ly/premio, scade tra 10 minuti.", f: "SLU", label: "spam" },
-  { from: "Mamma (in rubrica)", text: "Ricordati il latte, tornando.", f: "", label: "ok" },
-  { from: "Negozio di sport (iscritto)", text: "Saldi: -20% solo oggi su tutte le scarpe da corsa.", f: "U", label: "ok" },
-  { from: "Prof.ssa Rossi (in rubrica)", text: "Verifica spostata a venerdì, vedi circolare.", f: "", label: "ok" },
-  { from: "Mittente sconosciuto", text: "Il corriere ha provato a consegnare. Conferma indirizzo e dati della carta per la riconsegna.", f: "SC", label: "spam" },
-  { from: "Giulia (in rubrica)", text: "Urgente! Dimmi la password del profilo Netflix condiviso, la cambio io.", f: "UC", label: "ok" }
-];
-const TARGET_SCORE = TRAIN_MSGS.length;
-
-const TREE_ITEMS = [
-  { id: "personal", from: "Sara (in rubrica)", text: "Ehi, sei libero domani? Ti passo gli appunti di storia.", contacts: true, asks: false, link: false, leaf: "legit", truth: "legit" },
-  { id: "phishing", from: "Numero sconosciuto", text: "Il tuo conto è bloccato. Sblocca subito: bit.ly/sblocca-ora", contacts: false, asks: false, link: true, leaf: "phishing", truth: "phishing" },
-  { id: "hacked", from: "Luca (in rubrica)", text: "Mi servono 50 € urgenti, mandali a questo IBAN e poi ti spiego.", contacts: true, asks: true, link: false, leaf: "hacked", truth: "hacked" },
-  { id: "newsletter", from: "Libreria Alfa", text: "Le novità della settimana, scopri i libri consigliati.", contacts: false, asks: false, link: false, leaf: "newsletter", truth: "newsletter" }
-];
-const TREE_TEST = [
-  { text: "Pomeriggio di studio da me? Porto io i quaderni.", from: "Anna (in rubrica)", contacts: true, asks: false, link: false, truth: "legit" },
-  { text: "Hai un pacco in giacenza: paga i diritti su tinyurl.com/gt5.", from: "Mittente sconosciuto", contacts: false, asks: false, link: true, truth: "phishing" },
-  { text: "Offerte di novembre dal tuo negozio di fumetti.", from: "Fumetteria Beta", contacts: false, asks: false, link: false, truth: "newsletter" },
-  { text: "Ho perso il telefono, mi mandi 30 € di ricarica?", from: "Davide (in rubrica)", contacts: true, asks: true, link: false, truth: "hacked" },
-  { text: "Gentile cliente, aggiorni la password del conto rispondendo a questo messaggio.", from: "\"Assistenza banca\"", contacts: false, asks: true, link: false, truth: "phishing" }
-];
-const LEAF_LABEL = { hacked: "Account compromesso", legit: "Messaggio legittimo", phishing: "Phishing", newsletter: "Newsletter" };
-const predictTree = m => m.contacts ? (m.asks ? "hacked" : "legit") : (m.link ? "phishing" : "newsletter");
-
-/* ===== STATO ===== */
-let currentSection = 'history', currentHistoryIndex = 0, currentMLIndex = 0, activeLabSubGame = 'classification';
-const visitedSteps = new Set();
-let isMuted = false, labRun = 0;
-let trainerScore = 0, spamCount = 0, okCount = 0, activeMsg = null, isProcessing = false, isMagicRunning = false, learnedThreshold = 2;
-let currentTreeItemIndex = 0, isTreeTesting = false;
-const verifiedTreeItems = new Set();
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-/* ===== AUDIO ===== */
-const AC = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-function initAudio() { try { if (!audioCtx && AC) audioCtx = new AC(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
-function tone(freqs, type, dur, vol, step) {
-  if (isMuted || !AC) return; initAudio(); if (!audioCtx) return;
-  const now = audioCtx.currentTime;
-  freqs.forEach((f, i) => {
-    const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = now + i * (step || 0);
-    o.type = type; o.frequency.setValueAtTime(f[0], t);
-    if (f[1]) o.frequency.linearRampToValueAtTime(f[1], t + dur);
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.01, t + dur);
-    o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + dur);
-  });
+/* Schermata di esempio: riquadro con emoji e due righe di testo */
+function mock(bg, accent, emoji, line1, line2) {
+    return `<svg viewBox="0 0 400 180" class="w-full h-32 sm:h-40" role="img" aria-label="${line1} ${line2}">
+        <rect width="400" height="180" fill="${bg}" rx="16"/>
+        <rect x="24" y="30" width="352" height="120" rx="14" fill="#FFFFFF" stroke="${accent}" stroke-width="3"/>
+        <circle cx="68" cy="90" r="30" fill="${accent}"/>
+        <text x="68" y="101" font-size="30" text-anchor="middle">${emoji}</text>
+        <text x="112" y="82" font-size="15" font-weight="700" fill="#0F172A">${line1}</text>
+        <text x="112" y="106" font-size="13" font-weight="600" fill="#475569">${line2}</text>
+    </svg>`;
 }
-const playBip = () => tone([[500, 800]], 'sine', 0.08, 0.12);
-const playSuccessSound = () => tone([[523.25], [659.25], [783.99], [1046.5]], 'sine', 0.12, 0.15, 0.07);
-const playErrorSound = () => tone([[220, 150]], 'sawtooth', 0.25, 0.15);
-const playLaserScanSound = () => tone([[300, 1200]], 'triangle', 0.3, 0.08);
+
+const STORY_SLIDES = [
+    {
+        id: 'phishing',
+        title: "1. Phishing e Smishing (Truffe via Messaggio)",
+        badge: "RISCHIO 1 DI 20",
+        icon: "🎣",
+        desc: "Email, SMS e DM imitano banca, corriere o scuola per farti cliccare e inserire dati. Oggi l'IA li scrive in italiano perfetto, quindi la grammatica non basta più a smascherarli: contano mittente, link e fretta.",
+        speech: "Il phishing è l'inganno più diffuso. Con l'intelligenza artificiale i messaggi truffa sono scritti senza errori e persino personalizzati. Il segnale non è più la grammatica: guarda il mittente, controlla il link e diffida dell'urgenza.",
+        curiosity: "Cosa fare: non cliccare mai da un messaggio che mette fretta. Apri tu l'app o il sito ufficiale e verifica lì. Prima di toccare un link, controlla l'indirizzo reale.",
+        svg: mock("#E0F2FE", "#0284C7", "📩", "Poste: pacco in giacenza", "Paga 1,99€ entro 2h: poste-ritiro.top")
+    },
+    {
+        id: 'deepfake',
+        title: "2. Deepfake e Contenuti Sintetici",
+        badge: "RISCHIO 2 DI 20",
+        icon: "🎭",
+        desc: "L'IA genera volti, voci e video credibili di persone reali. Possono servire per scherzi, disinformazione, truffe o per colpire qualcuno. Creare e diffondere deepfake di una persona senza consenso può avere conseguenze legali.",
+        speech: "I deepfake sono contenuti falsi ma molto realistici, creati dall'intelligenza artificiale. Un video non è più una prova in sé. Prima di condividere, cerca la fonte originale e chiediti chi ci guadagna a farlo circolare.",
+        curiosity: "Cosa fare: prima di condividere un video sorprendente cerca la fonte originale e controlla se testate affidabili lo riportano. Se ritrae una persona reale senza il suo consenso, non inoltrarlo.",
+        svg: mock("#FEE2E2", "#DC2626", "🎭", "Video virale: il politico X ammette", "Nessuna fonte originale, audio sfasato")
+    },
+    {
+        id: 'privacy',
+        title: "3. La tua Impronta Digitale (Privacy e Dati)",
+        badge: "RISCHIO 3 DI 20",
+        icon: "🔐",
+        desc: "Ogni post, like e conversazione con un chatbot lascia tracce che possono essere raccolte, incrociate e usate per profilarti. In Italia, dai 14 anni puoi dare da solo/a il consenso al trattamento dei tuoi dati: è un diritto, e una responsabilità.",
+        speech: "Ogni cosa che scrivi o carichi lascia una traccia. Dai quattordici anni, in Italia, puoi dare da solo il consenso al trattamento dei tuoi dati: è un diritto ma anche una responsabilità. Prima di accettare, chiediti dove finiscono i tuoi dati.",
+        curiosity: "Cosa fare: non scrivere nei chatbot dati personali, documenti, foto private o informazioni sulla salute. Controlla le impostazioni privacy e se le tue conversazioni servono ad addestrare il modello.",
+        svg: mock("#FEF3C7", "#D97706", "🔐", "Accetti tutti i cookie e i termini?", "Chi riceve i tuoi dati? Per quanto tempo?")
+    },
+    {
+        id: 'voice_clone',
+        title: "4. Clonazione della Voce",
+        badge: "RISCHIO 4 DI 20",
+        icon: "🎙️",
+        desc: "Bastano pochi secondi di audio, magari presi da una storia pubblica, per imitare la voce di qualcuno. Le truffe del tipo «sono io, ho cambiato numero, mandami dei soldi» ora possono usare voci clonate di amici o familiari.",
+        speech: "Con pochi secondi di registrazione, l'intelligenza artificiale può imitare una voce. Se un vocale ti chiede soldi o ti mette fretta, non fidarti solo della voce: richiama la persona sul numero che hai già salvato.",
+        curiosity: "Cosa fare: concordate in famiglia una parola in codice. Se un vocale chiede soldi o urgenza, richiama sul numero già salvato in rubrica, non su quello nuovo.",
+        svg: mock("#F3E8FF", "#9333EA", "🎙️", "Vocale: «Sono io, telefono rotto!»", "«Mi mandi 50€ su questa carta?»")
+    },
+    {
+        id: 'cyberbullying',
+        title: "5. Cyberbullismo e Odio Online",
+        badge: "RISCHIO 5 DI 20",
+        icon: "🚫",
+        desc: "Insulti, esclusione dai gruppi, screenshot diffusi, profili falsi: online l'offesa si moltiplica e resta. L'IA rende facile creare meme, audio e immagini falsi per colpire qualcuno. La legge 71/2017 tutela le vittime e, dai 14 anni, puoi chiedere tu stesso/a la rimozione dei contenuti.",
+        speech: "Online l'offesa si moltiplica e non sparisce. Se sei vittima, salva le prove, blocca e segnala. Se sei spettatore, non condividere e sostieni chi è colpito: il silenzio e l'inoltro fanno parte del problema. La legge settantuno del duemiladiciassette ti tutela.",
+        curiosity: "Cosa fare: non rispondere, salva le prove con gli screenshot, blocca e segnala alla piattaforma, parlane con un adulto di fiducia. Se sei spettatore, non inoltrare e scrivi alla persona colpita.",
+        svg: mock("#DCFCE7", "#059669", "🚫", "Screenshot girato in chat di classe", "Salva le prove · Blocca · Segnala")
+    },
+    {
+        id: 'hallucinations',
+        title: "6. Allucinazioni dell'IA",
+        badge: "RISCHIO 6 DI 20",
+        icon: "🌀",
+        desc: "Un'IA generativa prevede parole plausibili, non verifica i fatti. Può inventare citazioni, date, fonti e persino sentenze, con un tono molto sicuro. Una risposta scritta bene non è per questo una risposta vera.",
+        speech: "Le allucinazioni sono risposte inventate ma scritte con sicurezza. L'intelligenza artificiale prevede parole probabili, non controlla la verità. Chiedile le fonti, e poi verificale tu: se un titolo o un link non esistono, la fonte è inventata.",
+        curiosity: "Cosa fare: chiedi all'IA le fonti e poi controllale davvero. Se il titolo, l'autore o il link non esistono, la citazione è inventata. Per ricerche scolastiche confronta sempre con libri e siti affidabili.",
+        svg: mock("#FAE8FF", "#A21CAF", "🌀", "«Secondo uno studio di Oxford 2023…»", "Titolo e autore: nessun risultato")
+    },
+    {
+        id: 'fake_avatars',
+        title: "7. Profili Falsi e Adescamento Online",
+        badge: "RISCHIO 7 DI 20",
+        icon: "🕵️",
+        desc: "Foto generate dall'IA e profili costruiti ad arte possono nascondere adulti o truffatori. Il copione tipico: complimenti, confidenze, richiesta di segretezza, poi foto o spostamento su un'altra app. Si chiama grooming (o catfishing se l'identità è inventata).",
+        speech: "Online chiunque può sembrare un coetaneo. I segnali di allarme sono sempre gli stessi: troppi complimenti, richiesta di segretezza, domande sulla tua vita privata e poi foto o cambio di app. Se li vedi, fermati e parlane con un adulto.",
+        curiosity: "Cosa fare: se ti chiedono segretezza, foto intime o di spostarti su un'app privata, fermati: sono segnali di adescamento. Non incontrare da solo/a chi conosci solo online. Parla con un adulto o chiama il 19696.",
+        svg: mock("#FFFBEB", "#B45309", "🕵️", "«Sei diversa dalle altre, non dirlo a nessuno»", "Chiede foto e un'app privata: allarme")
+    },
+    {
+        id: 'in_app_traps',
+        title: "8. Dark Pattern e Acquisti Nascosti",
+        badge: "RISCHIO 8 DI 20",
+        icon: "🧲",
+        desc: "Timer finti, «ultimi pezzi», loot box, abbonamenti che si rinnovano da soli: sono interfacce progettate per farti spendere. L'IA può personalizzare le offerte in base a quando e come giochi, e a quanto sei disposto/a a pagare.",
+        speech: "I dark pattern sono trucchi di progettazione che ti spingono a pagare: conto alla rovescia finti, offerte ultime ore, abbonamenti nascosti. Se un'offerta ti mette fretta, è fatta apposta. Controlla spesso gli abbonamenti attivi.",
+        curiosity: "Cosa fare: disattiva gli acquisti in-app, non salvare la carta nello store e controlla ogni mese gli abbonamenti attivi. Se un'offerta ti mette fretta, aspetta ventiquattro ore.",
+        svg: mock("#FEF2F2", "#DC2626", "🧲", "Offerta: ultimi 02:59 minuti!", "Prova gratis, poi 9,99€/settimana")
+    },
+    {
+        id: 'screen_addiction',
+        title: "9. Algoritmi e Dipendenza (Doomscrolling)",
+        badge: "RISCHIO 9 DI 20",
+        icon: "⏳",
+        desc: "I feed sono ottimizzati per massimizzare il tempo che passi sulla piattaforma: scroll infinito, autoplay, notifiche. Non è debolezza personale, è design. Contano le ore, ma anche sonno, umore e concentrazione.",
+        speech: "L'algoritmo guadagna dal tuo tempo. Scroll infinito, riproduzione automatica e notifiche sono progettati per trattenerti. Non è una colpa tua, ma puoi riprendere il controllo: limiti di tempo, notifiche spente e telefono fuori dalla camera di notte.",
+        curiosity: "Cosa fare: imposta limiti di tempo, spegni le notifiche non essenziali e lascia il telefono fuori dalla camera di notte. Ogni tanto chiediti: sto scegliendo io cosa guardare?",
+        svg: mock("#ECFDF5", "#047857", "⏳", "Ancora 5 minuti… sono le 02:14", "Autoplay: prossimo video tra 5 s")
+    },
+    {
+        id: 'location_sharing',
+        title: "10. Geolocalizzazione e Metadati",
+        badge: "RISCHIO 10 DI 20",
+        icon: "📍",
+        desc: "Foto, storie e app possono rivelare dove sei: metadati delle immagini, tag di luogo, posizione in tempo reale. Incrociando poche informazioni si può ricostruire dove abiti, dove studi e quali sono le tue abitudini.",
+        speech: "La posizione è un dato molto sensibile. Un tag, una foto e una storia in tempo reale bastano per capire dove abiti e a che ora esci. Disattiva la posizione nelle foto e condividi i luoghi solo dopo, mai in diretta.",
+        curiosity: "Cosa fare: togli la posizione dalle foto, non condividere luoghi in tempo reale e imposta la posizione su «solo con app in uso» oppure su «mai» per le app che non la richiedono.",
+        svg: mock("#EFF6FF", "#1D4ED8", "📍", "Storia: «Sono qui adesso!»", "Tag palestra + orario + scuola = routine")
+    },
+    {
+        id: 'virus_malware',
+        title: "11. Malware e Software Pirata",
+        badge: "RISCHIO 11 DI 20",
+        icon: "☣️",
+        desc: "Crack, mod, cheat e APK non ufficiali sono tra i veicoli preferiti dei malware: furto di account, ransomware, spyware. Anche finte app «IA» ed estensioni del browser possono nascondere codice dannoso.",
+        speech: "Il software pirata e le app non ufficiali sono una delle strade preferite dei malware. Rubano password, account e file. Scarica solo dagli store ufficiali, controlla le autorizzazioni richieste e tieni aggiornato il dispositivo.",
+        curiosity: "Cosa fare: scarica solo da store ufficiali, diffida di mod, cheat e crack «gratis», controlla le autorizzazioni richieste dalle app e tieni aggiornato il sistema.",
+        svg: mock("#F1F5F9", "#475569", "☣️", "GioCoolPro_crack_FREE.apk", "Richiede accesso a SMS e contatti")
+    },
+    {
+        id: 'fake_giveaways',
+        title: "12. Truffe: Giveaway, Cripto e Guadagni Facili",
+        badge: "RISCHIO 12 DI 20",
+        icon: "🎁",
+        desc: "Finti giveaway, falsi influencer che «raddoppiano» le criptovalute, lavoretti online miracolosi: l'IA produce video e testimonianze convincenti. Prestare conto o carta a qualcuno «per un piccolo compenso» può farti diventare complice di riciclaggio.",
+        speech: "Se qualcuno promette guadagni facili o regali in cambio dei tuoi dati o di un piccolo pagamento, è una truffa. Fai attenzione anche ai lavoretti in cui ti chiedono di prestare il conto: potresti diventare complice di un reato.",
+        curiosity: "Cosa fare: se un'offerta è troppo bella per essere vera, lo è. Non dare mai dati di carta o codici per ricevere un premio. Non prestare conto, carta o account a nessuno, nemmeno per un compenso.",
+        svg: mock("#FFF7ED", "#EA580C", "🎁", "Giveaway: raddoppia i tuoi 50€!", "Basta un deposito e il tuo codice")
+    },
+    {
+        id: 'ai_homework',
+        title: "13. IA e Compiti: Integrità e Pensiero Critico",
+        badge: "RISCHIO 13 DI 20",
+        icon: "🧠",
+        desc: "Consegnare testi scritti dall'IA non è solo scorretto: ti toglie proprio l'allenamento che ti serve. Usata bene è un tutor: spiega, fa domande, corregge. Usata male, ti sostituisce e ti lascia con un voto non tuo.",
+        speech: "L'intelligenza artificiale può essere un ottimo tutor, ma non deve pensare al posto tuo. Se copi, non alleni le competenze che poi ti serviranno all'esame, al lavoro e nella vita. Usala per capire, e poi riscrivi con parole tue.",
+        curiosity: "Cosa fare: usa l'IA per capire, farti interrogare e rivedere, non per consegnare. Riscrivi con parole tue, indica quando l'hai usata e rispetta le regole della scuola.",
+        svg: mock("#F0FDF4", "#15803D", "🧠", "Prompt: «Scrivi il mio tema di 500 parole»", "Meglio: «Spiegami la struttura di un tema»")
+    },
+    {
+        id: 'fake_news',
+        title: "14. Disinformazione e Fake News",
+        badge: "RISCHIO 14 DI 20",
+        icon: "📰",
+        desc: "Notizie false, foto manipolate e dati fuori contesto circolano più in fretta di quelle vere, perché fanno leva su rabbia e paura. L'IA permette di produrne tantissime a costo quasi zero. Un metodo semplice: ferma, indaga, confronta, risali all'origine.",
+        speech: "La disinformazione si diffonde perché provoca emozioni forti. Prima di condividere, usa il metodo in quattro passi: fermati, indaga sulla fonte, confronta con altre fonti indipendenti e risali all'origine della notizia.",
+        curiosity: "Metodo in quattro passi: 1. Fermati prima di condividere. 2. Indaga chi la pubblica. 3. Confronta con altre fonti indipendenti. 4. Risali alla fonte originale (foto, dati, documento).",
+        svg: mock("#FEF2F2", "#B91C1C", "📰", "URGENTE!!! Condividi prima che spariscano", "Nessuna fonte · foto senza data né luogo")
+    },
+    {
+        id: 'photo_permission',
+        title: "15. Immagini, Consenso e Ricatti (Sextortion)",
+        badge: "RISCHIO 15 DI 20",
+        icon: "📸",
+        desc: "Una foto privata inviata per fiducia può essere diffusa o usata per ricattare. L'IA può anche generare finte immagini intime partendo da un volto qualsiasi. Diffondere immagini intime di altri senza consenso è reato (art. 612-ter c.p.), e tra minorenni può comportare conseguenze molto serie per tutti.",
+        speech: "Mai inoltrare immagini private di altre persone, nemmeno per scherzo. Se qualcuno ti ricatta con delle immagini, anche false, non pagare e non cedere. Salva le prove, interrompi i contatti e chiedi aiuto subito: non è colpa tua.",
+        curiosity: "Cosa fare: se qualcuno ti ricatta con immagini vere o false, non pagare e non cedere. Salva le prove, interrompi i contatti e chiedi subito aiuto a un adulto, al 19696, al 114 o alla Polizia Postale. Non è colpa tua.",
+        svg: mock("#FAF5FF", "#7E22CE", "📸", "«Pago o pubblica le foto»", "Non pagare · Salva prove · Chiedi aiuto")
+    },
+    {
+        id: 'password_strength',
+        title: "16. Password, Gestori e Verifica in Due Passaggi",
+        badge: "RISCHIO 16 DI 20",
+        icon: "🔑",
+        desc: "Le password deboli o riusate cadono in pochi secondi: gli attacchi provano miliardi di combinazioni e riutilizzano le credenziali rubate da altri siti. Una frase lunga e unica per ogni account, più la verifica in due passaggi, blocca la maggior parte degli attacchi.",
+        speech: "Una password corta o riutilizzata si rompe in pochi secondi. Usa frasi lunghe e diverse per ogni account, un gestore di password e la verifica in due passaggi, soprattutto su email e social.",
+        curiosity: "Cosa fare: una password diversa per ogni account, meglio se è una frase lunga. Usa un gestore di password e attiva la verifica in due passaggi, a partire da email e social. Non condividerle con nessuno.",
+        svg: mock("#ECFEFF", "#0E7490", "🔑", "password123 → violata in 1 secondo", "4 parole casuali + 2FA = molto più forte")
+    },
+    {
+        id: 'ad_targeting',
+        title: "17. Profilazione e Pubblicità Mirata",
+        badge: "RISCHIO 17 DI 20",
+        icon: "🎯",
+        desc: "Il telefono di solito non ti «ascolta» di continuo: basta incrociare ricerche, like, posizione e dati di milioni di utenti per prevedere cosa ti interessa. Così annunci e contenuti ti inseguono e possono orientare acquisti, opinioni e umore.",
+        speech: "Spesso non serve ascoltarti: i tuoi clic, le ricerche e i dati di milioni di persone bastano per prevedere cosa ti interessa. La pubblicità mirata influenza acquisti e opinioni. Impara a distinguere i contenuti sponsorizzati dai consigli reali.",
+        curiosity: "Cosa fare: controlla le impostazioni sugli annunci, rifiuta i cookie non necessari e distingui sempre contenuti sponsorizzati e consigli reali. Gli influencer devono segnalare le collaborazioni a pagamento.",
+        svg: mock("#FFFBEB", "#B45309", "🎯", "Perché vedo questo annuncio?", "Profilo dedotto da ricerche, like e posizione")
+    },
+    {
+        id: 'impersonation_scams',
+        title: "18. Impersonificazione e Ingegneria Sociale",
+        badge: "RISCHIO 18 DI 20",
+        icon: "💬",
+        desc: "Account hackerati o cloni del profilo di un amico ti scrivono: «mi aiuti con un codice?», «guarda, sei in questo video». Spesso vogliono il tuo codice di verifica o l'accesso al tuo account. È ingegneria sociale: si attacca la persona, non il sistema.",
+        speech: "L'ingegneria sociale inganna le persone, non i computer. Se un amico ti chiede un codice ricevuto via messaggio, non darlo: potrebbe essere il codice per entrare nel tuo account. Conferma sempre con un altro canale.",
+        curiosity: "Cosa fare: non dare mai a nessuno i codici di verifica ricevuti via SMS o app. Prima di fare qualsiasi cosa, conferma con l'amico su un altro canale, per esempio con una telefonata.",
+        svg: mock("#FDF4FF", "#A21CAF", "💬", "«Ti è arrivato un codice? Mandamelo»", "È il codice per entrare nel tuo account")
+    },
+    {
+        id: 'copyright_respect',
+        title: "19. Copyright, Licenze e Trasparenza",
+        badge: "RISCHIO 19 DI 20",
+        icon: "🎨",
+        desc: "I modelli sono addestrati su opere di artisti reali, spesso senza il loro consenso: il dibattito legale è aperto. Per te contano il diritto d'autore, la citazione delle fonti e la trasparenza su ciò che è generato dall'IA.",
+        speech: "Le opere che l'intelligenza artificiale genera derivano da opere di persone reali. Per questo contano il diritto d'autore, la citazione delle fonti e la trasparenza: dichiara sempre quando un testo o un'immagine sono stati generati con l'IA.",
+        curiosity: "Cosa fare: cita le fonti, controlla le licenze, per esempio Creative Commons, e indica quando un'immagine o un testo sono generati con l'IA. Non spacciare per tuo il lavoro di altri.",
+        svg: mock("#F0F9FF", "#0369A1", "🎨", "Immagine «tua»? Controlla la licenza", "Cita autore, fonte e uso dell'IA")
+    },
+    {
+        id: 'super_hero_seal',
+        title: "20. Il Sigillo della Cittadinanza Digitale",
+        badge: "RISCHIO 20 DI 20",
+        icon: "🏆",
+        desc: "Hai attraversato 20 rischi, e il filo conduttore è sempre lo stesso: rallenta, verifica, proteggi i tuoi dati, rispetta gli altri e chiedi aiuto quando serve. Sono abitudini, e si allenano come tutte le altre.",
+        speech: "Complimenti, hai completato tutte e venti le tappe. Ricorda il filo conduttore: rallenta, verifica, proteggi i tuoi dati, rispetta gli altri e chiedi aiuto quando serve. La tecnologia amplifica ciò che ci metti dentro.",
+        curiosity: "Regola finale: rallenta, verifica, proteggi i dati, rispetta gli altri, chiedi aiuto. La tecnologia amplifica quello che ci metti: usala per creare, imparare e proteggere te stesso/a e gli altri.",
+        svg: mock("#FEF9C3", "#CA8A04", "🏆", "Rallenta · Verifica · Proteggi", "Rispetta · Chiedi aiuto")
+    }
+];
+
+/* ============ CASI DETECTIVE (autentico o falso) ============ */
+function caseCard(bg, emoji, title, body, small) {
+    return `<svg viewBox="0 0 300 150" class="w-full h-full" role="img" aria-label="${title}. ${body}">
+        <rect width="300" height="150" fill="${bg}"/>
+        <text x="150" y="44" font-size="34" text-anchor="middle">${emoji}</text>
+        <text x="150" y="76" font-size="13" font-weight="700" text-anchor="middle" fill="#0F172A">${title}</text>
+        <text x="150" y="100" font-size="11.5" font-weight="600" text-anchor="middle" fill="#334155">${body}</text>
+        <text x="150" y="124" font-size="10.5" font-weight="600" text-anchor="middle" fill="#64748B">${small}</text>
+    </svg>`;
+}
+
+const DETECTOR_CASES = [
+    {
+        id: 1,
+        title: "Foto virale di una manifestazione",
+        hint: "Metodo: ingrandisci mani, orecchie, scritte sullo sfondo e riflessi. Le immagini generate sbagliano spesso i dettagli.",
+        isReal: false,
+        speech: "Una foto diventata virale mostra una folla in piazza. Ingrandendo, un uomo ha sei dita e i cartelli sono scritti con lettere senza senso. È autentica o è un falso?",
+        explain: "Falso. Dita in più e scritte illeggibili sono errori tipici delle immagini generate dall'IA.",
+        svg: caseCard("#E0F2FE", "📷", "Foto virale: folla in piazza", "Un uomo ha 6 dita · cartelli con lettere strane", "Nessun autore, nessuna agenzia, nessuna data")
+    },
+    {
+        id: 2,
+        title: "Notizia con fonti multiple",
+        hint: "Metodo: la stessa notizia compare su più fonti indipendenti e rimanda al documento originale?",
+        isReal: true,
+        speech: "Una notizia sulle nuove date di un esame è sul sito ufficiale dell'ente e viene ripresa da più testate, con il link al documento originale. È autentica o è un falso?",
+        explain: "Autentico. Fonte ufficiale, più testate indipendenti e documento originale consultabile: i tre controlli sono superati.",
+        svg: caseCard("#DCFCE7", "📰", "Nuove date dell'esame di Stato", "Sito ufficiale + 3 testate indipendenti", "Con link al documento originale")
+    },
+    {
+        id: 3,
+        title: "SMS dal «registro elettronico»",
+        hint: "Metodo: guarda il dominio del link e il tono. Il registro vero lo apri dall'app o dal sito che già conosci, mai da un SMS.",
+        isReal: false,
+        speech: "Un SMS dice: il tuo account del registro scade oggi, aggiorna i dati su un indirizzo che finisce con punto info. È autentico o è una truffa?",
+        explain: "Truffa. Dominio sospetto, urgenza e richiesta di dati sono i segnali classici dello smishing.",
+        svg: caseCard("#FEF3C7", "📩", "«Il tuo account scade oggi»", "Aggiorna i dati: scuola-registro-login.info", "Mittente: numero sconosciuto")
+    },
+    {
+        id: 4,
+        title: "Vocale di un «amico» in difficoltà",
+        hint: "Metodo: urgenza, soldi e numero nuovo? Fermati e richiama il numero che hai già salvato.",
+        isReal: false,
+        speech: "Ricevi un vocale con la voce di un tuo amico: ho perso il telefono, mi mandi cinquanta euro su questa carta? Scrive da un numero nuovo. È autentico o è un falso?",
+        explain: "Falso, o almeno da non fidarsi. La voce si può clonare: urgenza, soldi e numero nuovo richiedono una verifica su un altro canale.",
+        svg: caseCard("#F3E8FF", "🎙️", "Vocale: «Sono io, ho perso il telefono»", "«Mandami 50€ su questa carta, ora!»", "Numero mai visto prima")
+    },
+    {
+        id: 5,
+        title: "Foto con fonte e credenziali",
+        hint: "Metodo: la foto ha autore, luogo, data e agenzia? Alcuni strumenti aggiungono anche credenziali di provenienza.",
+        isReal: true,
+        speech: "Una foto di cronaca è pubblicata da un'agenzia di stampa, con autore, luogo, data e credenziali di provenienza verificabili. Altre testate la riportano uguale. È autentica o è un falso?",
+        explain: "Autentico, con buona probabilità. Autore, luogo, data e provenienza verificabili, più riscontri indipendenti, rendono la foto affidabile.",
+        svg: caseCard("#ECFEFF", "🖼️", "Foto di cronaca da agenzia", "Autore, luogo, data e provenienza verificabili", "Riportata da più testate")
+    },
+    {
+        id: 6,
+        title: "Citazione di un chatbot",
+        hint: "Metodo: cerca titolo e autore dello studio. Se non trovi nulla, chiedi all'IA il link e controlla anche quello.",
+        isReal: false,
+        speech: "Un chatbot cita uno studio di Oxford del duemilaventitré, dell'inesistente professor Valli. Cercando titolo e autore non trovi nessun risultato. È autentico o è un falso?",
+        explain: "Falso. È un'allucinazione: l'IA ha inventato una fonte plausibile. Verifica sempre le citazioni prima di usarle.",
+        svg: caseCard("#FAE8FF", "🤖", "Chatbot: «Studio Oxford 2023, prof. Valli»", "«Il 90% dei teen non dorme abbastanza»", "Ricerca di titolo e autore: 0 risultati")
+    }
+];
+
+/* ============ PALESTRA 1: BUONE PRATICHE O RISCHI ============ */
+const SORTING_ITEMS = [
+    { id: 1, name: "Attivare la verifica in due passaggi sull'email", isSafe: true, emoji: "🔐" },
+    { id: 2, name: "Email della banca: «Conto sospeso, verifica entro 2 ore»", isSafe: false, emoji: "🏦⚠️" },
+    { id: 3, name: "Controllare una notizia su due fonti indipendenti", isSafe: true, emoji: "🔎" },
+    { id: 4, name: "Installare l'APK crackato di un gioco a pagamento", isSafe: false, emoji: "📦☣️" },
+    { id: 5, name: "Nuovo contatto: «Passiamo su un'altra app e non dirlo a nessuno»", isSafe: false, emoji: "🕵️" },
+    { id: 6, name: "Farti spiegare un argomento dall'IA e riscriverlo con parole tue", isSafe: true, emoji: "🤖📝" }
+];
+
+/* ============ PALESTRA 2: SCUDO DEL RISPETTO ============ */
+const SHIELD_MESSAGES = [
+    { id: 1, text: "Non sono d'accordo con te, ma capisco il tuo punto.", isGentle: true, emoji: "💬", speech: "Non sono d'accordo con te, ma capisco il tuo punto." },
+    { id: 2, text: "Giriamo lo screenshot dei suoi vocali in chat di classe, ridiamo tutti!", isGentle: false, emoji: "🚫", speech: "Giriamo lo screenshot dei suoi vocali in chat di classe, ridiamo tutti!" },
+    { id: 3, text: "Bel lavoro sul progetto! Se vuoi ti passo i miei appunti.", isGentle: true, emoji: "🌟", speech: "Bel lavoro sul progetto! Se vuoi ti passo i miei appunti." },
+    { id: 4, text: "Se non fai quello che dico, pubblico le tue foto.", isGentle: false, emoji: "🛑", speech: "Se non fai quello che dico, pubblico le tue foto." },
+    { id: 5, text: "Ho fatto con l'IA un video finto con la tua faccia e lo carico. Tanto è uno scherzo!", isGentle: false, emoji: "🎭", speech: "Ho fatto con l'IA un video finto con la tua faccia e lo carico. Tanto è uno scherzo!" }
+];
+
+/* ============ GLOSSARIO: 10 DIFESE + 10 RISCHI ============ */
+const BADGE_POS = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+const BADGE_NEG = 'bg-rose-100 text-rose-800 border-rose-300';
+
+const GLOSSARY_TERMS = [
+    // --- 10 DIFESE E STRUMENTI ---
+    {
+        id: 'ia', name: 'Intelligenza Artificiale generativa', category: 'positive',
+        badgeText: '🛡️ STRUMENTO', badgeClass: BADGE_POS, emoji: '🤖',
+        desc: 'Sistemi che imparano da enormi quantità di dati e generano testi, immagini, audio o codice. Utili per studiare e creare, ma vanno usati con senso critico: possono sbagliare e sono addestrati su opere di altri.',
+        speech: 'L\'intelligenza artificiale generativa produce testi, immagini e audio a partire dai dati con cui è stata addestrata. È utile per studiare e creare, ma può sbagliare: usala con senso critico e verifica sempre.'
+    },
+    {
+        id: 'prompt', name: 'Prompt', category: 'positive',
+        badgeText: '🛡️ STRUMENTO', badgeClass: BADGE_POS, emoji: '✍️',
+        desc: 'L\'istruzione che dai a un\'IA. Più è chiara (contesto, obiettivo, formato), migliore sarà il risultato. Non inserirci mai dati personali o riservati.',
+        speech: 'Il prompt è l\'istruzione che dai all\'intelligenza artificiale. Più è chiaro nel contesto, nell\'obiettivo e nel formato, più il risultato sarà utile. E ricorda: nel prompt non vanno dati personali o riservati.'
+    },
+    {
+        id: 'privacy', name: 'Privacy e GDPR', category: 'positive',
+        badgeText: '🛡️ DIRITTO', badgeClass: BADGE_POS, emoji: '🔐',
+        desc: 'Il diritto di controllare i tuoi dati personali. Il GDPR ti garantisce, tra l\'altro, accesso, cancellazione e opposizione. In Italia, dai 14 anni puoi dare da solo/a il consenso per i servizi online.',
+        speech: 'La privacy è il tuo diritto a controllare i tuoi dati. Il regolamento europeo, il GDPR, ti dà diritti di accesso, cancellazione e opposizione. In Italia, dai quattordici anni puoi consentire da solo al trattamento dei dati: usa questo potere con attenzione.'
+    },
+    {
+        id: 'moderazione', name: 'Moderazione e segnalazione', category: 'positive',
+        badgeText: '🛡️ PROTEZIONE', badgeClass: BADGE_POS, emoji: '🧹',
+        desc: 'Sistemi automatici e umani che rimuovono i contenuti dannosi. Non sono perfetti: se vedi qualcosa di grave, segnalalo tu alla piattaforma.',
+        speech: 'La moderazione è il sistema, automatico e umano, che rimuove i contenuti dannosi. Non è perfetto, quindi la segnalazione è importante: se vedi qualcosa di grave, segnalalo sempre alla piattaforma.'
+    },
+    {
+        id: 'pseudonimo', name: 'Pseudonimo e identità digitale', category: 'positive',
+        badgeText: '🛡️ PRIVACY', badgeClass: BADGE_POS, emoji: '🪪',
+        desc: 'Un nome utente che non rivela i tuoi dati reali. Protegge la privacy, ma non è anonimato totale: online resti responsabile di ciò che scrivi e pubblichi.',
+        speech: 'Uno pseudonimo protegge i tuoi dati reali, ma non ti rende invisibile né irresponsabile. La tua identità digitale è l\'insieme di ciò che pubblichi, e resta nel tempo.'
+    },
+    {
+        id: '2fa', name: 'Verifica in due passaggi (2FA)', category: 'positive',
+        badgeText: '🛡️ SICUREZZA', badgeClass: BADGE_POS, emoji: '📲🔑',
+        desc: 'Oltre alla password serve un secondo elemento, come un codice nell\'app o una chiave di sicurezza. Anche se rubano la password, l\'account resta protetto.',
+        speech: 'La verifica in due passaggi aggiunge un secondo controllo alla password. Anche se qualcuno la scopre, non può entrare. Attivala almeno su email e social, e non comunicare mai i codici a nessuno.'
+    },
+    {
+        id: 'factcheck', name: 'Fact-checking', category: 'positive',
+        badgeText: '🛡️ METODO', badgeClass: BADGE_POS, emoji: '🔎',
+        desc: 'Verificare una notizia: chi l\'ha pubblicata, quando, da quale fonte originale, e se altre fonti indipendenti la confermano. In Italia esistono siti dedicati, come Pagella Politica e Facta.',
+        speech: 'Il fact-checking è il controllo dei fatti. Chiediti chi ha pubblicato la notizia, quando, da quale fonte originale, e se altre fonti indipendenti la confermano. Esistono siti specializzati, come Pagella Politica e Facta.'
+    },
+    {
+        id: 'password-manager', name: 'Gestore di password', category: 'positive',
+        badgeText: '🛡️ SICUREZZA', badgeClass: BADGE_POS, emoji: '🗝️',
+        desc: 'Un\'app che crea e conserva password lunghe e diverse per ogni account, protette da un\'unica chiave principale. Ti evita di riutilizzare la stessa password ovunque.',
+        speech: 'Un gestore di password crea e conserva password lunghe e diverse per ogni account. Devi ricordare soltanto la chiave principale, e questa deve essere lunga e solo tua.'
+    },
+    {
+        id: 'netiquette', name: 'Netiquette e rispetto', category: 'positive',
+        badgeText: '🛡️ COMPORTAMENTO', badgeClass: BADGE_POS, emoji: '🤝',
+        desc: 'Le regole di rispetto per comunicare online: criticare le idee e non le persone, non diffondere contenuti altrui senza consenso, ricordare che dall\'altra parte c\'è una persona.',
+        speech: 'La netiquette è il rispetto applicato alla rete. Critica le idee e non le persone, non diffondere contenuti altrui senza consenso e ricorda che dall\'altra parte dello schermo c\'è sempre una persona.'
+    },
+    {
+        id: 'aiuto', name: 'Adulti di riferimento e aiuto', category: 'positive',
+        badgeText: '🛡️ SUPPORTO', badgeClass: BADGE_POS, emoji: '🆘',
+        desc: 'Genitori, docenti, educatori. Per aiuto: Telefono Azzurro 19696, Emergenza Infanzia 114. Per segnalare reati online: Polizia Postale (commissariatodips.it).',
+        speech: 'Chiedere aiuto è una competenza, non una debolezza. Puoi parlare con un adulto di fiducia, chiamare il Telefono Azzurro al 19696 o il 114, oppure segnalare reati online alla Polizia Postale.'
+    },
+
+    // --- 10 RISCHI ---
+    {
+        id: 'deepfake', name: 'Deepfake', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🎭',
+        desc: 'Foto, video o audio falsi ma molto realistici, generati dall\'IA, che fanno apparire una persona reale mentre dice o fa cose mai avvenute.',
+        speech: 'Il deepfake è un contenuto falso ma realistico, creato con l\'intelligenza artificiale, in cui una persona reale sembra dire o fare qualcosa che non ha mai fatto. Un video, da solo, non basta più come prova.'
+    },
+    {
+        id: 'phishing', name: 'Phishing e Smishing', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🎣',
+        desc: 'Messaggi (email, SMS, DM) che imitano enti o persone fidate per farti cliccare su un link o dare dati e codici. Con l\'IA sono scritti senza errori.',
+        speech: 'Phishing e smishing sono truffe via email e SMS che imitano enti o persone fidate. Con l\'intelligenza artificiale non hanno più errori di grammatica: controlla sempre mittente e link, e diffida dell\'urgenza.'
+    },
+    {
+        id: 'cyberbullismo', name: 'Cyberbullismo', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🚫',
+        desc: 'Aggressioni ripetute online: insulti, esclusione, diffusione di foto o chat, profili falsi. La legge 71/2017 tutela le vittime e permette, dai 14 anni, di chiedere la rimozione dei contenuti.',
+        speech: 'Il cyberbullismo sono aggressioni ripetute online, come insulti, esclusioni e diffusione di materiali privati. La legge settantuno del duemiladiciassette tutela le vittime. Se assisti, non restare in silenzio e non inoltrare.'
+    },
+    {
+        id: 'clonazione-voce', name: 'Clonazione della voce', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🎙️',
+        desc: 'Un\'IA che imita la voce di una persona partendo da pochi secondi di audio. Usata per finti vocali e telefonate che chiedono soldi o dati.',
+        speech: 'La clonazione vocale imita la voce di una persona partendo da pochi secondi di registrazione. Se un messaggio chiede soldi o urgenza, richiama sul numero che hai già salvato oppure usa una parola in codice.'
+    },
+    {
+        id: 'disinformazione', name: 'Disinformazione (Fake news)', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '📰',
+        desc: 'Contenuti falsi o fuori contesto che circolano come notizie. Fanno leva su rabbia e paura per essere condivisi, e l\'IA ne rende facile la produzione di massa.',
+        speech: 'La disinformazione è fatta di contenuti falsi o fuori contesto presentati come notizie. Funziona perché provoca emozioni forti. Prima di condividere: fermati, indaga, confronta e risali alla fonte originale.'
+    },
+    {
+        id: 'malware', name: 'Malware', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '☣️',
+        desc: 'Software dannoso (virus, spyware, ransomware) che arriva con crack, mod, app non ufficiali o allegati. Ruba account e dati o blocca i file chiedendo un riscatto.',
+        speech: 'Il malware è software dannoso che ruba dati o blocca i file. Arriva spesso con crack, mod, app non ufficiali e allegati sospetti. Scarica solo da fonti ufficiali e tieni aggiornati i dispositivi.'
+    },
+    {
+        id: 'dark-pattern', name: 'Dark pattern', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🧲',
+        desc: 'Interfacce progettate per spingerti a un\'azione che non vorresti: timer finti, rinnovi nascosti, pulsante «rifiuta» quasi invisibile, loot box.',
+        speech: 'I dark pattern sono trucchi di progettazione che ti spingono a fare ciò che non vorresti: conto alla rovescia finti, rinnovi nascosti, pulsanti per rifiutare quasi invisibili. Quando ti sembra di essere sotto pressione, fermati.'
+    },
+    {
+        id: 'grooming', name: 'Grooming e catfishing', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🕵️',
+        desc: 'Un adulto costruisce fiducia con un minore online per poi manipolarlo (grooming), spesso con identità inventata (catfishing). Segnali: segretezza, regali, richiesta di foto o di cambiare app.',
+        speech: 'Il grooming è la costruzione di una falsa fiducia online per manipolare un minore, spesso con un profilo inventato. I segnali sono la richiesta di segretezza, i regali e la richiesta di foto o di cambiare app. In quel caso, parlane subito con un adulto.'
+    },
+    {
+        id: 'sextortion', name: 'Sextortion', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🛑',
+        desc: 'Ricatto basato su immagini intime vere o generate con l\'IA, di solito per ottenere denaro o altre immagini. Chi ricatta conta sulla vergogna: chiedere aiuto è la mossa giusta e non è mai colpa di chi lo subisce.',
+        speech: 'La sextortion è un ricatto con immagini intime, vere o false. Chi ricatta conta sulla tua vergogna. Non pagare, non cedere, salva le prove e chiedi aiuto subito: non è colpa tua.'
+    },
+    {
+        id: 'allucinazione-ia', name: 'Allucinazione dell\'IA', category: 'negative',
+        badgeText: '⚠️ RISCHIO', badgeClass: BADGE_NEG, emoji: '🌀',
+        desc: 'Quando un\'IA generativa produce informazioni inventate (fonti, date, citazioni) presentandole con sicurezza. Succede perché prevede parole probabili e non verifica i fatti.',
+        speech: 'Un\'allucinazione è una risposta inventata, scritta con sicurezza. L\'intelligenza artificiale prevede parole probabili e non verifica i fatti. Controlla sempre le fonti prima di usare ciò che ti dice.'
+    }
+];
+
+/* ============ STATO ============ */
+let currentSection = 'stories';
+let currentStoryIndex = 0;
+let currentDetectorIndex = 0;
+let activeLabSubGame = 'sorting';
+let selectedGlossaryTermIndex = 0;
+let glossaryFilter = 'all';
+let visitedStories = new Set([0]);
+let isMuted = false;
+let inputLocked = false;
+
+let safeCount = 0;
+let dangerCount = 0;
+let currentSortingItemIndex = 0;
+let currentShieldIndex = 0;
+
+const NAV_ON = "px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-indigo-600 text-white border-indigo-700 shadow-md";
+const NAV_OFF = "px-3 sm:px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm border-2 transition flex items-center gap-1.5 bg-white text-indigo-900 border-indigo-200 hover:bg-indigo-50";
+const SUB_ON = "px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border-2 border-indigo-700 shadow flex items-center gap-1.5 transition";
+const SUB_OFF = "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-indigo-900 border-2 border-indigo-200 hover:bg-indigo-50 flex items-center gap-1.5 transition";
+
+/* ============ AUDIO (Web Audio) ============ */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+    try {
+        if (!AudioCtx) return;
+        if (!audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* audio non disponibile */ }
+}
+
+function tone(type, freqs, dur, vol, step) {
+    if (isMuted || !AudioCtx) return;
+    initAudio();
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    freqs.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const start = now + i * step;
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(vol, start);
+        gain.gain.exponentialRampToValueAtTime(0.01, start + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(start);
+        osc.stop(start + dur);
+    });
+}
+
+function playBip() { tone('sine', [700], 0.08, 0.12, 0); }
+function playSuccessSound() { tone('sine', [523.25, 659.25, 783.99, 1046.5], 0.12, 0.2, 0.07); }
+function playErrorSound() { tone('sawtooth', [220, 170], 0.2, 0.15, 0.12); }
+
+/* ============ VOCE FEMMINILE (Speech Synthesis) ============ */
+function pickFemaleItalianVoice() {
+    const voices = window.speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('it'));
+    const prefer = ['Elsa', 'Alice', 'Federica', 'Paola', 'Isabella', 'Google italiano', 'Google Italiano', 'Female'];
+    for (const name of prefer) {
+        const v = voices.find(x => x.name.includes(name));
+        if (v) return v;
+    }
+    return voices[0] || null;
+}
+
+function setRobotText(text) {
+    document.getElementById('robot-text').innerText = text;
+}
 
 function speakText(text) {
-  if (isMuted || !('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'it-IT'; u.rate = 0.96; u.pitch = 0.9;
-  const v = window.speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('it'));
-  if (v) u.voice = v;
-  const av = $('robot-avatar');
-  u.onstart = () => av.classList.add('robot-talking');
-  u.onend = u.onerror = () => av.classList.remove('robot-talking');
-  window.speechSynthesis.speak(u);
+    if (isMuted || !('speechSynthesis' in window)) return;
+    try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'it-IT';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.1;
+
+        const voice = pickFemaleItalianVoice();
+        if (voice) utterance.voice = voice;
+
+        const robotAvatar = document.getElementById('robot-avatar');
+        utterance.onstart = () => { if (robotAvatar) robotAvatar.classList.add('robot-talking'); };
+        utterance.onend = utterance.onerror = () => { if (robotAvatar) robotAvatar.classList.remove('robot-talking'); };
+
+        window.speechSynthesis.speak(utterance);
+    } catch (e) { /* sintesi vocale non disponibile */ }
 }
-function say(text, speak = true) { $('robot-text').innerText = text; if (speak) speakText(text); }
-function toggleMute() {
-  isMuted = !isMuted;
-  if (isMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-  $('mute-text').innerText = isMuted ? "Audio disattivato" : "Audio attivo";
-}
+
 function speakCurrentContext() {
-  playBip();
-  let text = "";
-  if (currentSection === 'history') text = HISTORY_SLIDES[currentHistoryIndex].speech;
-  else if (currentSection === 'ml') text = ML_TABS[currentMLIndex].speech;
-  else if (activeLabSubGame === 'classification') {
-    text = trainerScore < TARGET_SCORE
-      ? "Fase di training: etichetta i messaggi come spam o legittimi. Ogni indizio che vedi è una feature. Più esempi corretti dai, migliore sarà la regola che ricaverò."
-      : "Training completato. Avvia il test: valuterò la regola su messaggi che non ho mai visto.";
-  } else {
-    text = verifiedTreeItems.size < 4
-      ? "Training dell'albero: rispondi alle domande sì o no seguendo le caratteristiche del messaggio, fino a raggiungere una foglia."
-      : "Albero pronto. Avvia il test: lo applicherò a messaggi nuovi e vedremo l'accuratezza.";
-  }
-  say(text);
+    playBip();
+    if (currentSection === 'stories') {
+        const story = STORY_SLIDES[currentStoryIndex];
+        setRobotText(story.speech);
+        speakText(story.speech);
+    } else if (currentSection === 'detector') {
+        const c = DETECTOR_CASES[currentDetectorIndex];
+        if (c) { setRobotText(c.speech); speakText(c.speech); }
+        else speakDetectorContext();
+    } else if (currentSection === 'trainer') {
+        if (activeLabSubGame === 'sorting') {
+            const text = "Trascina lo scenario nel cesto verde se è una buona pratica, o nel cesto rosso se è un rischio. Puoi anche toccare il cesto che scegli.";
+            setRobotText(text);
+            speakText(text);
+        } else {
+            speakShieldMessage();
+        }
+    } else if (currentSection === 'glossary') {
+        speakSelectedGlossaryTerm();
+    }
 }
 
-/* ===== NAVIGAZIONE ===== */
-function setSel(btn, on) { btn.setAttribute('aria-selected', on ? 'true' : 'false'); }
+function toggleMute() {
+    isMuted = !isMuted;
+    if (isMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    document.getElementById('mute-icon').innerText = isMuted ? "🔇" : "🔊";
+    document.getElementById('mute-text').innerText = isMuted ? "AUDIO DISATTIVATO" : "AUDIO ATTIVO";
+}
+
+/* ============ NAVIGAZIONE SEZIONI ============ */
 function switchSection(sec) {
-  playBip(); currentSection = sec; labRun++;
-  ['history', 'ml', 'trainer'].forEach(k => {
-    setSel($('nav-btn-' + k), k === sec);
-    $('section-' + k).hidden = k !== sec;
-  });
-  if (sec === 'history') renderHistorySlide();
-  else if (sec === 'ml') renderMLTab();
-  else if (activeLabSubGame === 'classification') resetTrainerGame(); else resetTreeGame();
+    playBip();
+    currentSection = sec;
+    inputLocked = false;
+
+    ['stories', 'detector', 'trainer', 'glossary'].forEach(key => {
+        const btn = document.getElementById('nav-btn-' + key);
+        const section = document.getElementById('section-' + key);
+        if (key === sec) {
+            btn.className = NAV_ON;
+            section.classList.remove('hidden');
+            section.classList.add('flex');
+        } else {
+            btn.className = NAV_OFF;
+            section.classList.add('hidden');
+            section.classList.remove('flex');
+        }
+    });
+
+    if (sec === 'stories') renderStorySlide();
+    else if (sec === 'detector') {
+        if (currentDetectorIndex >= DETECTOR_CASES.length) currentDetectorIndex = 0;
+        renderDetectorCase();
+    } else if (sec === 'trainer') {
+        if (activeLabSubGame === 'sorting') initSortingGame();
+        else resetShieldGame();
+    } else if (sec === 'glossary') {
+        renderGlossaryUI();
+    }
 }
 
-/* ===== STORIA ===== */
-function renderThumbnails() {
-  const c = $('timeline-thumbnails'); c.innerHTML = '';
-  HISTORY_SLIDES.forEach((s, i) => {
-    const b = document.createElement('button');
-    b.className = 'thumb' + (i === currentHistoryIndex ? ' now' : visitedSteps.has(i) ? ' seen' : '');
-    b.innerHTML = `<span class="y">${esc(s.year)}</span><span class="n">${esc(s.shortName)}</span>`;
-    b.setAttribute('aria-label', `Tappa ${i + 1}: ${s.shortName}, ${s.year}`);
-    b.onclick = () => { playBip(); currentHistoryIndex = i; renderHistorySlide(); };
-    c.appendChild(b);
-  });
+/* ============ SEZIONE 1: RISCHI DELL'IA ============ */
+function renderStorySlide() {
+    const story = STORY_SLIDES[currentStoryIndex];
+    visitedStories.add(currentStoryIndex);
+
+    document.getElementById('story-step-badge').innerText = story.badge;
+    document.getElementById('story-title').innerText = story.title;
+    document.getElementById('story-description').innerText = story.desc;
+    document.getElementById('story-svg-container').innerHTML = story.svg;
+
+    document.getElementById('btn-story-prev').disabled = currentStoryIndex === 0;
+    document.getElementById('btn-story-next').disabled = currentStoryIndex === STORY_SLIDES.length - 1;
+    document.getElementById('star-count').innerText = `${visitedStories.size}/${STORY_SLIDES.length}`;
+
+    renderStoriesGrid();
+    speakCurrentContext();
 }
-function updateStarCount() {
-  $('star-count').innerText = `${visitedSteps.size}/18`;
-  if (visitedSteps.size === 18 && !updateStarCount.done) {
-    updateStarCount.done = true;
-    if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-  }
+
+function changeStorySlide(dir) {
+    initAudio();
+    currentStoryIndex = Math.max(0, Math.min(STORY_SLIDES.length - 1, currentStoryIndex + dir));
+    renderStorySlide();
 }
-function renderHistorySlide(silent) {
-  const d = HISTORY_SLIDES[currentHistoryIndex];
-  visitedSteps.add(currentHistoryIndex); updateStarCount();
-  $('history-step-badge').innerText = `Tappa ${d.id} di 18`;
-  $('history-year').innerText = d.year;
-  $('history-tag').innerText = d.tag;
-  $('history-title').innerText = d.title;
-  $('history-description').innerText = d.description;
-  $('history-svg-container').innerHTML = d.svg;
-  $('btn-hist-prev').disabled = currentHistoryIndex === 0;
-  $('btn-hist-next').innerText = currentHistoryIndex === 17 ? "Come impara una macchina →" : "Avanti →";
-  renderThumbnails();
-  say(d.speech, !silent);
+
+function renderStoriesGrid() {
+    const container = document.getElementById('stories-grid-container');
+    container.innerHTML = '';
+    STORY_SLIDES.forEach((st, idx) => {
+        const btn = document.createElement('button');
+        const isCurrent = idx === currentStoryIndex;
+        const isVisited = visitedStories.has(idx);
+
+        btn.className = `flex flex-col items-center justify-center p-2 rounded-xl text-xs font-black transition border-2 ${
+            isCurrent
+                ? 'bg-indigo-600 text-white border-indigo-800 scale-105 shadow-md z-10'
+                : (isVisited ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100')
+        }`;
+
+        btn.title = st.title;
+        btn.setAttribute('aria-label', st.title);
+        btn.onclick = () => {
+            initAudio();
+            currentStoryIndex = idx;
+            renderStorySlide();
+        };
+
+        btn.innerHTML = `<span class="text-sm mb-0.5 leading-none">${st.icon}</span><span>${idx + 1}</span>`;
+        container.appendChild(btn);
+    });
 }
-function changeHistorySlide(delta) {
-  playBip();
-  if (delta === 1 && currentHistoryIndex === HISTORY_SLIDES.length - 1) { switchSection('ml'); return; }
-  currentHistoryIndex = Math.max(0, Math.min(HISTORY_SLIDES.length - 1, currentHistoryIndex + delta));
-  renderHistorySlide();
-}
+
 function openCuriosityModal() {
-  playBip();
-  const d = HISTORY_SLIDES[currentHistoryIndex];
-  $('modal-curiosity-title').innerText = `${d.year} · ${d.shortName}`;
-  $('modal-curiosity-body').innerText = d.curiosity;
-  $('curiosity-modal').hidden = false;
-}
-function closeCuriosityModal() { playBip(); $('curiosity-modal').hidden = true; }
-
-/* ===== ML ===== */
-function selectMLTab(i) { playBip(); currentMLIndex = i; mlStep = 0; renderMLTab(); }
-function renderMLTab() {
-  const d = ML_TABS[currentMLIndex];
-  for (let i = 0; i < 3; i++) setSel($(`btn-ml-${i + 1}`), i === currentMLIndex);
-  $('ml-title').innerText = d.title;
-  $('ml-subtitle').innerText = d.subtitle;
-  $('ml-description').innerText = d.description;
-  $('ml-terms').innerHTML = d.terms.map(t => `<span class="term">${esc(t)}</span>`).join('');
-  $('ml-action-text').innerText = d.btnText;
-  renderMLVisual(d.visualType, false);
-  say(d.speech);
-}
-const A_PTS = [[50,40],[80,70],[100,35],[115,90],[70,100],[120,55],[90,60]];
-const B_PTS = [[180,50],[210,90],[240,40],[190,110],[225,70],[255,105],[170,80]];
-const CL = [[[45,35],[65,50],[55,25],[75,40],[60,60]], [[135,95],[160,110],[150,85],[170,100],[145,115]], [[225,35],[250,55],[240,30],[260,50],[235,60]]];
-const EP_REWARD = [-8, -5, -6, -1, 2, 1, 5, 8];
-let mlStep = 0;
-const pts = (arr, cls, r) => arr.map(([x, y]) => `<circle cx="${x}" cy="${y + 10}" r="${r || 6}" class="${cls}"/>`).join('');
-
-function renderMLVisual(type, done) {
-  const box = $('ml-visual-box');
-  if (type === 'supervised') {
-    box.innerHTML = `<svg viewBox="0 0 300 160" role="img" aria-label="Classificazione a due classi"><rect x="4" y="4" width="292" height="152" rx="8" class="fp ln thin"/>${pts(A_PTS, 'fa')}${pts(B_PTS, 'fw')}
-      ${done ? `<path d="M160 8 L140 150" class="ln" stroke-width="2.4" stroke-dasharray="6 4"/><circle cx="205" cy="70" r="8" class="fp ln wrn"/><text x="205" y="74" text-anchor="middle" class="tx wn">?</text><text x="214" y="58" class="tx sm wn">→ classe B</text>` : ''}
-      <text x="20" y="22" class="tx sm ac">● classe A (etichetta nota)</text><text x="150" y="152" class="tx sm wn">● classe B (etichetta nota)</text></svg>
-      <p class="status">${done ? "Confine di decisione appreso · accuratezza sul training: 14/14. Il punto nuovo cade nella regione B." : "Ogni punto ha un'etichetta (colore). Due feature per punto: asse x e asse y."}</p>`;
-  } else if (type === 'unsupervised') {
-    const cols = ['fa', 'fw', 'fo'];
-    box.innerHTML = `<svg viewBox="0 0 300 160" role="img" aria-label="Punti senza etichette"><rect x="4" y="4" width="292" height="152" rx="8" class="fp ln thin"/>
-      ${done ? CL.map((c, k) => pts(c, cols[k])).join('') + CL.map((c, k) => { const cx = c.reduce((s, p) => s + p[0], 0) / c.length, cy = c.reduce((s, p) => s + p[1], 0) / c.length + 10; return `<path d="M${cx - 7} ${cy - 7} L${cx + 7} ${cy + 7} M${cx - 7} ${cy + 7} L${cx + 7} ${cy - 7}" class="ln" stroke-width="3"/>`; }).join('') : CL.map(c => pts(c, 'fm')).join('')}</svg>
-      <p class="status">${done ? "3 gruppi trovati. Le X sono i centroidi, cioè le medie di ciascun gruppo. L'algoritmo non sa cosa rappresentino." : "Punti senza etichette: tutti grigi. Il modello conosce solo le posizioni."}</p>`;
-  } else {
-    const n = mlStep, eps = Math.max(0.1, 1 - n * 0.12).toFixed(2);
-    const X = i => 40 + i * 31, Y = r => 80 - r * 6;
-    const poly = EP_REWARD.slice(0, n).map((r, i) => `${X(i)},${Y(r)}`).join(' ');
-    box.innerHTML = `<svg viewBox="0 0 300 160" role="img" aria-label="Ricompensa per episodio"><rect x="4" y="4" width="292" height="152" rx="8" class="fp ln thin"/>
-      <path d="M32 80 L284 80 M32 14 L32 146" class="ln mt thin"/><text x="36" y="22" class="tx sm mt">ricompensa</text><text x="230" y="94" class="tx sm mt">episodi →</text>
-      ${n ? `<polyline points="${poly}" class="ln acc" stroke-width="2.6"/>` : ''}
-      ${EP_REWARD.slice(0, n).map((r, i) => `<circle cx="${X(i)}" cy="${Y(r)}" r="4.5" class="${r >= 0 ? 'fo' : 'fw'}"/>`).join('')}</svg>
-      <p class="status">${n ? `Episodio ${n}: ricompensa ${EP_REWARD[n - 1] > 0 ? '+' : ''}${EP_REWARD[n - 1]} · esplorazione ε = ${eps}` : "Nessun episodio ancora. All'inizio la ricompensa è bassa: l'agente prova azioni a caso (ε = 1,00)."}</p>`;
-  }
-}
-function triggerMLDemoAction() {
-  initAudio(); playSuccessSound();
-  const t = ML_TABS[currentMLIndex];
-  if (t.visualType === 'supervised') {
-    renderMLVisual('supervised', true);
-    say("Il modello ha ricavato un confine che separa le due classi. Per il punto nuovo con il punto interrogativo prevede la classe B. Resta da verificare su un test set.");
-  } else if (t.visualType === 'unsupervised') {
-    renderMLVisual('unsupervised', true);
-    say("K-means ha diviso i punti in tre gruppi, senza etichette. Il significato dei gruppi lo decidi tu.");
-  } else {
-    mlStep = mlStep >= EP_REWARD.length ? 1 : mlStep + 1;
-    renderMLVisual('reinforcement');
-    const r = EP_REWARD[mlStep - 1];
-    say(mlStep === EP_REWARD.length ? "Dopo otto episodi la ricompensa totale è molto più alta: l'agente ha imparato una buona politica." : `Episodio ${mlStep}: ricompensa ${r}. L'agente aggiorna la politica e prova di nuovo.`);
-  }
+    playBip();
+    const story = STORY_SLIDES[currentStoryIndex];
+    document.getElementById('modal-curiosity-title').innerText = story.title;
+    document.getElementById('modal-curiosity-body').innerText = story.curiosity;
+    document.getElementById('curiosity-modal').classList.remove('hidden');
+    speakCuriosityModalText();
 }
 
-/* ===== LABORATORIO ===== */
-function switchLabSubGame(g) {
-  playBip(); labRun++; activeLabSubGame = g;
-  setSel($('btn-subgame-classification'), g === 'classification');
-  setSel($('btn-subgame-tree'), g === 'tree');
-  $('subgame-classification-container').style.display = g === 'classification' ? 'flex' : 'none';
-  $('subgame-tree-container').style.display = g === 'tree' ? 'flex' : 'none';
-  if (g === 'classification') resetTrainerGame(); else { currentTreeItemIndex = 0; verifiedTreeItems.clear(); resetTreeGame(); }
+function speakCuriosityModalText() {
+    playBip();
+    const story = STORY_SLIDES[currentStoryIndex];
+    setRobotText(story.curiosity);
+    speakText(story.curiosity);
 }
+
+function closeCuriosityModal() {
+    playBip();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    document.getElementById('curiosity-modal').classList.add('hidden');
+}
+
+/* ============ SEZIONE 2: DETECTIVE ============ */
+function showVictory(title, message) {
+    if (typeof confetti === 'function') confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
+    document.getElementById('victory-title').innerText = title;
+    document.getElementById('victory-message').innerText = message;
+    document.getElementById('victory-modal').classList.remove('hidden');
+    playSuccessSound();
+}
+
+function renderDetectorCase() {
+    inputLocked = false;
+    if (currentDetectorIndex >= DETECTOR_CASES.length) {
+        document.getElementById('detector-score-tag').innerText = `Casi risolti: ${DETECTOR_CASES.length} / ${DETECTOR_CASES.length}`;
+        showVictory("DETECTIVE ESPERTO/A", "Hai analizzato tutti i casi con metodo: fonte, dettagli e riscontri incrociati.");
+        return;
+    }
+
+    const c = DETECTOR_CASES[currentDetectorIndex];
+    document.getElementById('detector-case-visual').innerHTML = c.svg;
+    document.getElementById('detector-hint-box').innerText = "💡 " + c.hint;
+    document.getElementById('detector-score-tag').innerText = `Casi risolti: ${currentDetectorIndex} / ${DETECTOR_CASES.length}`;
+
+    setRobotText(c.speech);
+    speakText(c.speech);
+}
+
+function answerDetector(userChoiceIsReal) {
+    if (inputLocked || currentDetectorIndex >= DETECTOR_CASES.length) return;
+    initAudio();
+    const c = DETECTOR_CASES[currentDetectorIndex];
+
+    if (userChoiceIsReal === c.isReal) {
+        inputLocked = true;
+        playSuccessSound();
+        updateRobotFace('happy');
+        showFloatingFeedback('✅ OTTIMO LAVORO!', true);
+        setRobotText(c.explain);
+        speakText(c.explain);
+        currentDetectorIndex++;
+        setTimeout(renderDetectorCase, 4500);
+    } else {
+        playErrorSound();
+        updateRobotFace('sad');
+        showFloatingFeedback('❌ RIFLETTI E RIPROVA', false);
+        const retry = "Non proprio. " + c.hint;
+        setRobotText(retry);
+        speakText(retry);
+        setTimeout(() => updateRobotFace('neutral'), 800);
+    }
+}
+
+function speakDetectorContext() {
+    playBip();
+    const text = "Analizza il caso con metodo. Tocca autentico se i controlli sono superati, oppure falso o truffa se riconosci un'immagine generata, una truffa o una disinformazione.";
+    setRobotText(text);
+    speakText(text);
+}
+
+function playCurrentDetectorAudio() {
+    speakCurrentContext();
+}
+
+/* ============ SEZIONE 3: PALESTRA SCUDO ============ */
+function switchLabSubGame(sub) {
+    playBip();
+    activeLabSubGame = sub;
+    inputLocked = false;
+    const b1 = document.getElementById('btn-subgame-sorting');
+    const b2 = document.getElementById('btn-subgame-shield');
+    const c1 = document.getElementById('subgame-sorting-container');
+    const c2 = document.getElementById('subgame-shield-container');
+
+    if (sub === 'sorting') {
+        b1.className = SUB_ON;
+        b2.className = SUB_OFF;
+        c1.classList.remove('hidden');
+        c1.classList.add('flex');
+        c2.classList.add('hidden');
+        c2.classList.remove('flex');
+        initSortingGame();
+    } else {
+        b2.className = SUB_ON;
+        b1.className = SUB_OFF;
+        c2.classList.remove('hidden');
+        c2.classList.add('flex');
+        c1.classList.add('hidden');
+        c1.classList.remove('flex');
+        resetShieldGame();
+    }
+}
+
+function initSortingGame() {
+    inputLocked = false;
+    currentSortingItemIndex = 0;
+    safeCount = 0;
+    dangerCount = 0;
+    document.getElementById('safe-container').innerHTML = '';
+    document.getElementById('danger-container').innerHTML = '';
+    document.getElementById('safe-count-tag').innerText = '(0)';
+    document.getElementById('danger-count-tag').innerText = '(0)';
+    renderSortingItem();
+}
+
+function renderSortingItem() {
+    inputLocked = false;
+    if (currentSortingItemIndex >= SORTING_ITEMS.length) {
+        document.getElementById('trainer-progress-text').innerText = `Scenari valutati: ${SORTING_ITEMS.length} / ${SORTING_ITEMS.length}`;
+        showVictory("PALESTRA COMPLETATA", "Hai distinto correttamente le buone pratiche dai rischi.");
+        return;
+    }
+
+    const item = SORTING_ITEMS[currentSortingItemIndex];
+    const spawn = document.getElementById('item-spawn');
+    spawn.innerHTML = `
+        <div id="draggable-card" draggable="true" ondragstart="handleDragStart(event)" class="draggable-item bg-white border-4 border-amber-300 px-4 py-2 rounded-2xl shadow-lg flex items-center gap-2 max-w-full">
+            <span class="text-3xl shrink-0">${item.emoji}</span>
+            <span class="font-black text-xs sm:text-sm text-slate-800 text-left">${item.name}</span>
+        </div>
+    `;
+
+    document.getElementById('trainer-progress-text').innerText = `Scenari valutati: ${currentSortingItemIndex} / ${SORTING_ITEMS.length}`;
+    setupDropBaskets();
+    speakCurrentContext();
+}
+
+function setupDropBaskets() {
+    const safeB = document.getElementById('safe-basket');
+    const dangerB = document.getElementById('danger-basket');
+
+    [safeB, dangerB].forEach(b => {
+        b.ondragover = (e) => { e.preventDefault(); b.classList.add('drag-over'); };
+        b.ondragleave = () => { b.classList.remove('drag-over'); };
+        b.ondrop = (e) => {
+            e.preventDefault();
+            b.classList.remove('drag-over');
+            checkSortingAnswer(b.id === 'safe-basket');
+        };
+        b.onclick = () => checkSortingAnswer(b.id === 'safe-basket');
+    });
+}
+
+function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', 'item');
+}
+
+function checkSortingAnswer(userChoiceSafe) {
+    if (inputLocked || currentSortingItemIndex >= SORTING_ITEMS.length) return;
+    initAudio();
+    const item = SORTING_ITEMS[currentSortingItemIndex];
+
+    if (userChoiceSafe === item.isSafe) {
+        inputLocked = true;
+        playSuccessSound();
+        updateRobotFace('happy');
+
+        if (item.isSafe) {
+            safeCount++;
+            document.getElementById('safe-count-tag').innerText = `(${safeCount})`;
+            document.getElementById('safe-container').innerHTML += `<span class="text-xl">${item.emoji}</span>`;
+        } else {
+            dangerCount++;
+            document.getElementById('danger-count-tag').innerText = `(${dangerCount})`;
+            document.getElementById('danger-container').innerHTML += `<span class="text-xl">${item.emoji}</span>`;
+        }
+
+        showFloatingFeedback('✅ CLASSIFICATO BENE!', true);
+        currentSortingItemIndex++;
+        setTimeout(renderSortingItem, 900);
+    } else {
+        playErrorSound();
+        updateRobotFace('sad');
+        showFloatingFeedback('❌ RIFLETTI E RIPROVA', false);
+        setTimeout(() => updateRobotFace('neutral'), 800);
+    }
+}
+
+function speakCurrentItem() {
+    playBip();
+    const item = SORTING_ITEMS[currentSortingItemIndex];
+    if (!item) return;
+    speakText(`Lo scenario è: ${item.name}`);
+}
+
+function resetShieldGame() {
+    inputLocked = false;
+    currentShieldIndex = 0;
+    renderShieldCard();
+}
+
+function renderShieldCard() {
+    inputLocked = false;
+    if (currentShieldIndex >= SHIELD_MESSAGES.length) {
+        document.getElementById('shield-progress-text').innerText = `Messaggi valutati: ${SHIELD_MESSAGES.length} / ${SHIELD_MESSAGES.length}`;
+        showVictory("SCUDO ATTIVO", "Hai riconosciuto il confronto rispettoso e hai fermato aggressioni, ricatti e falsi.");
+        return;
+    }
+
+    const msg = SHIELD_MESSAGES[currentShieldIndex];
+    document.getElementById('shield-item-emoji').innerText = msg.emoji;
+    document.getElementById('shield-item-text').innerText = `"${msg.text}"`;
+    document.getElementById('shield-progress-text').innerText = `Messaggi valutati: ${currentShieldIndex} / ${SHIELD_MESSAGES.length}`;
+
+    speakShieldMessage();
+}
+
+function speakShieldMessage() {
+    playBip();
+    const msg = SHIELD_MESSAGES[currentShieldIndex];
+    if (!msg) return;
+    setRobotText(`Il messaggio dice: ${msg.text}`);
+    speakText(msg.speech);
+}
+
+function answerShieldAction(userChoiceGentle) {
+    if (inputLocked || currentShieldIndex >= SHIELD_MESSAGES.length) return;
+    initAudio();
+    const msg = SHIELD_MESSAGES[currentShieldIndex];
+
+    if (userChoiceGentle === msg.isGentle) {
+        inputLocked = true;
+        playSuccessSound();
+        updateRobotFace('happy');
+        showFloatingFeedback('✅ VALUTAZIONE CORRETTA!', true);
+        currentShieldIndex++;
+        setTimeout(renderShieldCard, 1000);
+    } else {
+        playErrorSound();
+        updateRobotFace('sad');
+        showFloatingFeedback('❌ RIFLETTI E RIPROVA', false);
+        setTimeout(() => updateRobotFace('neutral'), 800);
+    }
+}
+
+function speakShieldConcept() {
+    playBip();
+    const text = "Il disaccordo rispettoso è sano. Insulti, esclusione, ricatti e falsi creati con l'intelligenza artificiale no. In quel caso: blocca, salva le prove, segnala e parlane con un adulto.";
+    setRobotText(text);
+    speakText(text);
+}
+
 function resetActiveLabGame() {
-  $('victory-modal').hidden = true;
-  if (activeLabSubGame === 'classification') resetTrainerGame();
-  else { verifiedTreeItems.clear(); currentTreeItemIndex = 0; resetTreeGame(); }
-}
-function setBadge(text, test) { const b = $('trainer-phase-badge'); b.className = 'badge ' + (test ? 'test' : 'train'); b.innerText = text; }
-function showFloat(msg, ok) {
-  const d = document.createElement('div'); d.className = 'float ' + (ok ? 'ok' : 'bad'); d.innerText = msg;
-  document.body.appendChild(d); setTimeout(() => d.remove(), 950);
-}
-function updateRobotFace(state) {
-  const av = $('robot-avatar'), l = $('robot-antenna-light'), m = $('robot-mouth');
-  av.classList.remove('robot-happy', 'robot-sad');
-  if (state === 'happy') { av.classList.add('robot-happy'); l.setAttribute('fill', '#10B981'); m.setAttribute('d', 'M 70 80 Q 100 108 130 80'); }
-  else if (state === 'sad') { av.classList.add('robot-sad'); l.setAttribute('fill', '#EF4444'); m.setAttribute('d', 'M 75 95 Q 100 80 125 95'); }
-  else { l.setAttribute('fill', '#F59E0B'); m.setAttribute('d', 'M 75 85 Q 100 95 125 85'); }
-}
-function showResults(title, message, rows, badge) {
-  $('victory-title').innerText = title;
-  $('victory-message').innerText = message;
-  $('victory-results').innerHTML = rows.map(r => `<li class="${r.ok ? 'ok' : 'bad'}"><b>${r.ok ? '✓' : '✗'}</b><span>${r.html}</span></li>`).join('');
-  $('victory-badge-desc').innerText = badge;
-  $('victory-modal').hidden = false;
-  if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-}
-
-/* --- Gioco A: classificazione --- */
-function flagsHtml(f) { return f ? [...f].map(k => `<span class="chip">${esc(FLAGS[k])}</span>`).join('') : '<span class="chip none">nessun indizio</span>'; }
-function resetTrainerGame() {
-  labRun++;
-  trainerScore = 0; spamCount = 0; okCount = 0; isProcessing = false; isMagicRunning = false; activeMsg = null;
-  ['spam', 'ok'].forEach(k => { $(k + '-container').innerHTML = ''; $(k + '-count-tag').innerText = '(0)'; });
-  $('victory-modal').hidden = true;
-  $('magic-ml-panel').hidden = true; $('scanner-laser').hidden = true;
-  $('conveyor-container').classList.remove('run');
-  setBadge("Fase 1 · Training", false);
-  $('trainer-instruction-text').innerText = "Trascina il messaggio nel cesto giusto, oppure toccalo e poi tocca il cesto.";
-  updateTrainerProgress();
-  spawnMessage(TRAIN_MSGS[0], true);
-  say("Sei il prof. Etichetta ogni messaggio come spam o legittimo guardando gli indizi: più esempi corretti dai, migliore sarà il modello.");
-}
-function updateTrainerProgress() { $('trainer-progress-text').innerText = `Esempi etichettati: ${trainerScore} / ${TARGET_SCORE}`; }
-function spawnMessage(m, draggable) {
-  const spawn = $('fruit-spawn'); spawn.innerHTML = '';
-  activeMsg = m;
-  const el = document.createElement('div');
-  el.className = 'msg'; el.id = 'active-fruit';
-  el.innerHTML = `<div class="from">Da: ${esc(m.from)}</div><div class="body">${esc(m.text)}</div><div class="chips">${flagsHtml(m.f)}</div>`;
-  if (draggable) {
-    el.setAttribute('draggable', 'true');
-    el.addEventListener('dragstart', e => { if (isMagicRunning) return; initAudio(); e.dataTransfer.setData('text/plain', m.label); });
-    setupTouchEvents(el);
-  } else { el.style.cursor = 'default'; }
-  spawn.appendChild(el);
-  updateRobotFace('neutral');
-}
-function setupTouchEvents(el) {
-  let sx = 0, sy = 0;
-  el.addEventListener('touchstart', e => { if (isProcessing || isMagicRunning) return; initAudio(); sx = e.touches[0].clientX; sy = e.touches[0].clientY; el.style.transition = 'none'; }, { passive: false });
-  el.addEventListener('touchmove', e => { if (isProcessing || isMagicRunning) return; e.preventDefault(); el.style.transform = `translate(${e.touches[0].clientX - sx}px, ${e.touches[0].clientY - sy}px) scale(1.04)`; }, { passive: false });
-  el.addEventListener('touchend', e => {
-    if (isProcessing || isMagicRunning) return;
-    el.style.transition = 'transform .2s ease';
-    const t = e.changedTouches[0], target = document.elementFromPoint(t.clientX, t.clientY), b = target ? target.closest('.basket') : null;
-    if (b) checkClassification(activeMsg.label, b.id === 'spam-basket' ? 'spam' : 'ok'); else el.style.transform = 'translate(0,0)';
-  });
-}
-function setupBasketDropZones() {
-  [['spam-basket', 'spam'], ['ok-basket', 'ok']].forEach(([id, type]) => {
-    const b = $(id);
-    b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('drag-over'); });
-    b.addEventListener('dragleave', () => b.classList.remove('drag-over'));
-    b.addEventListener('drop', e => { e.preventDefault(); b.classList.remove('drag-over'); if (isMagicRunning || !activeMsg) return; checkClassification(e.dataTransfer.getData('text/plain') || activeMsg.label, type); });
-    b.addEventListener('click', () => { if (isMagicRunning || isProcessing || !activeMsg || trainerScore >= TARGET_SCORE) return; initAudio(); checkClassification(activeMsg.label, type); });
-  });
-}
-function addToBasket(type, n) {
-  const d = document.createElement('span'); d.className = 'dot'; d.innerText = n;
-  $(type + '-container').appendChild(d);
-  if (type === 'spam') { spamCount++; $('spam-count-tag').innerText = `(${spamCount})`; } else { okCount++; $('ok-count-tag').innerText = `(${okCount})`; }
-}
-function checkClassification(truth, target) {
-  if (isProcessing) return; isProcessing = true;
-  const el = $('active-fruit');
-  if (truth === target) {
-    playSuccessSound(); updateRobotFace('happy');
-    showFloat("Etichetta corretta. Esempio registrato", true);
-    trainerScore++; addToBasket(target, trainerScore); updateTrainerProgress();
-    if (el) { el.style.opacity = '0'; el.style.transform = 'scale(.8)'; }
-    setTimeout(() => {
-      isProcessing = false;
-      if (trainerScore < TARGET_SCORE) spawnMessage(TRAIN_MSGS[trainerScore], true); else showMagicButtonPrompt();
-    }, 450);
-  } else {
-    playErrorSound(); updateRobotFace('sad');
-    showFloat("Etichetta errata: controlla gli indizi", false);
-    say("Etichetta sbagliata. Se i dati di training contengono errori, il modello impara errori: in inglese si dice \"garbage in, garbage out\".", false);
-    if (el) el.style.transform = 'translate(0,0)';
-    setTimeout(() => { updateRobotFace('neutral'); isProcessing = false; }, 700);
-  }
-}
-function showMagicButtonPrompt() {
-  const spamF = TRAIN_MSGS.filter(m => m.label === 'spam').map(m => m.f.length);
-  const okF = TRAIN_MSGS.filter(m => m.label === 'ok').map(m => m.f.length);
-  learnedThreshold = (Math.max(...okF) + Math.min(...spamF)) / 2;
-  $('learned-rule').innerHTML = `Dai tuoi 6 esempi ho ricavato questa regola sul numero di indizi:<br>i messaggi legittimi ne avevano al massimo <code>${Math.max(...okF)}</code>, lo spam almeno <code>${Math.min(...spamF)}</code>.<br><code>se indizi &gt; ${learnedThreshold} → spam</code>`;
-  $('magic-ml-panel').hidden = false;
-  say("Training completato. Ho ricavato una regola dai tuoi esempi. Ora la verifichiamo su messaggi nuovi, perché funzionare sul training set non basta.");
-}
-function startMagicML() {
-  const run = ++labRun; isMagicRunning = true;
-  $('magic-ml-panel').hidden = true;
-  setBadge("Fase 2 · Test su dati nuovi", true);
-  $('scanner-laser').hidden = false; $('conveyor-container').classList.add('run');
-  $('trainer-instruction-text').innerText = "Il modello applica la regola a messaggi mai visti. Osserva dove sbaglia.";
-  say("Fase di test: applico la regola a sei messaggi nuovi e confronto la previsione con la risposta vera.");
-  const results = []; let i = 0;
-  const step = () => {
-    if (run !== labRun) return;
-    if (i >= TEST_MSGS.length) {
-      $('conveyor-container').classList.remove('run'); $('scanner-laser').hidden = true;
-      const ok = results.filter(r => r.ok).length, acc = Math.round(ok / results.length * 100);
-      setTimeout(() => {
-        if (run !== labRun) return;
-        showResults(`Accuratezza sul test set: ${ok}/${results.length} (${acc}%)`,
-          ok === results.length ? "Il modello ha classificato correttamente tutti i messaggi nuovi."
-          : "Il modello funziona bene, ma non è perfetto. Sul training set era al 100%, sui dati nuovi no: è la ragione per cui si valuta sempre su un test set.",
-          results.map(r => ({ ok: r.ok, html: `${esc(r.m.text)}<br><span class="mono" style="font-size:11px;color:var(--muted)">previsto: ${r.pred === 'spam' ? 'spam' : 'legittimo'} · reale: ${r.m.label === 'spam' ? 'spam' : 'legittimo'} · indizi: ${r.m.f.length}</span>` })),
-          "Hai appena addestrato e valutato un classificatore supervisionato. Il messaggio sbagliato è un falso negativo: spam che il modello lascia passare perché ha meno indizi della soglia. Con più esempi e più feature la regola migliorerebbe.");
-      }, 600);
-      return;
+    playBip();
+    document.getElementById('victory-modal').classList.add('hidden');
+    inputLocked = false;
+    if (currentSection === 'detector') {
+        currentDetectorIndex = 0;
+        renderDetectorCase();
+    } else if (activeLabSubGame === 'sorting') {
+        initSortingGame();
+    } else {
+        resetShieldGame();
     }
-    const m = TEST_MSGS[i];
-    spawnMessage(m, false); playLaserScanSound();
-    setTimeout(() => {
-      if (run !== labRun) return;
-      const pred = m.f.length > learnedThreshold ? 'spam' : 'ok', ok = pred === m.label;
-      results.push({ m, pred, ok });
-      const el = $('active-fruit');
-      if (el) { const v = document.createElement('div'); v.className = 'verdict ' + (ok ? 'ok' : 'bad'); v.innerText = (pred === 'spam' ? 'SPAM' : 'LEGITTIMO') + (ok ? ' ✓' : ' ✗'); $('conveyor-container').appendChild(v); setTimeout(() => v.remove(), 1000); }
-      if (ok) { playSuccessSound(); updateRobotFace('happy'); } else { playErrorSound(); updateRobotFace('sad'); }
-      i++; setTimeout(step, 1100);
-    }, 800);
-  };
-  step();
 }
 
-/* --- Gioco B: albero decisionale --- */
-function speakTreeConcept() {
-  playBip();
-  say("Un albero decisionale pone domande sì o no in sequenza. A ogni passo l'algoritmo sceglie la domanda che riduce di più l'impurità di Gini, cioè che separa meglio le classi. Le foglie sono le decisioni finali.");
-}
-function nodeClass(id, cls) { $(id).className = (id === 'tree-node-1' ? 'node root ' : 'node ') + cls; }
-function resetTreeGame() {
-  labRun++; isTreeTesting = false;
-  const it = TREE_ITEMS[currentTreeItemIndex];
-  $('tree-from').innerText = "Da: " + it.from; $('tree-mystery').innerText = it.text;
-  $('tree-result-banner').hidden = true; $('tree-scanner-laser').hidden = true; $('victory-modal').hidden = true;
-  setBadge("Fase 1 · Training albero", false);
-  nodeClass('tree-node-1', 'active'); $('tree-q1-controls').hidden = false;
-  nodeClass('tree-node-2a', ''); nodeClass('tree-node-2b', '');
-  $('tree-q2a-controls').hidden = true; $('tree-q2b-controls').hidden = true;
-  Object.keys(LEAF_LABEL).forEach(k => $('leaf-' + k).className = 'leaf');
-  updateTreeProgressUI();
-  say(`Training dell'albero. Messaggio da ${it.from}: segui le domande per portarlo alla foglia giusta.`);
-}
-function updateTreeProgressUI() {
-  const n = verifiedTreeItems.size;
-  $('tree-training-progress-text').innerText = `Percorsi verificati: ${n} / 4`;
-  $('btn-tree-magic-test').hidden = n < 4;
-  $('tree-training-progress-text').hidden = n >= 4;
-}
-function treeWrong(msg) { playErrorSound(); updateRobotFace('sad'); showFloat(msg, false); setTimeout(() => updateRobotFace('neutral'), 600); }
-function answerTreeQuestion(node, choice) {
-  initAudio();
-  const it = TREE_ITEMS[currentTreeItemIndex];
-  if (node === 1) {
-    if (choice !== it.contacts) return treeWrong("Controlla il mittente: è in rubrica?");
-    playSuccessSound(); updateRobotFace('happy');
-    $('tree-q1-controls').hidden = true; nodeClass('tree-node-1', 'passed');
-    const next = choice ? '2a' : '2b';
-    nodeClass('tree-node-' + next, 'active'); $('tree-q' + next + '-controls').hidden = false;
-    say(choice ? "Mittente in rubrica. Seconda domanda: chiede denaro o password?" : "Mittente sconosciuto. Seconda domanda: c'è un link abbreviato?");
-  } else if (node === '2a') {
-    if (choice !== it.asks) return treeWrong("Rileggi il testo: chiede soldi o password?");
-    finishTreeTrainingPath(it);
-  } else {
-    if (choice !== it.link) return treeWrong("Cerca link tipo bit.ly o tinyurl");
-    finishTreeTrainingPath(it);
-  }
-}
-function finishTreeTrainingPath(it) {
-  playSuccessSound(); updateRobotFace('happy');
-  $('leaf-' + it.leaf).className = 'leaf hit';
-  $('tree-q2a-controls').hidden = true; $('tree-q2b-controls').hidden = true;
-  verifiedTreeItems.add(it.id); updateTreeProgressUI();
-  const b = $('tree-result-banner'); b.innerText = `Foglia raggiunta: ${LEAF_LABEL[it.leaf]}`; b.hidden = false;
-  if (verifiedTreeItems.size < 4) {
-    say(`Percorso corretto: ${LEAF_LABEL[it.leaf]}. Passiamo al prossimo messaggio.`);
-    const run = labRun;
-    setTimeout(() => { if (run !== labRun) return; currentTreeItemIndex = (currentTreeItemIndex + 1) % TREE_ITEMS.length; resetTreeGame(); }, 1500);
-  } else {
-    say("Hai verificato tutti e quattro i percorsi. Avvia il test: l'albero classificherà messaggi nuovi da solo.");
-  }
-}
-function startMagicTreeTest() {
-  const run = ++labRun; isTreeTesting = true;
-  setBadge("Fase 2 · Test albero", true);
-  $('btn-tree-magic-test').hidden = true; $('tree-scanner-laser').hidden = false; $('tree-result-banner').hidden = true;
-  say("Fase di test: l'albero percorre le sue domande su cinque messaggi nuovi, senza il mio aiuto.");
-  const results = []; let i = 0;
-  const step = () => {
-    if (run !== labRun) return;
-    if (i >= TREE_TEST.length) {
-      $('tree-scanner-laser').hidden = true;
-      const ok = results.filter(r => r.ok).length, acc = Math.round(ok / results.length * 100);
-      setTimeout(() => {
-        if (run !== labRun) return;
-        showResults(`Accuratezza sul test set: ${ok}/${results.length} (${acc}%)`,
-          "L'albero ha percorso le sue domande su messaggi mai visti.",
-          results.map(r => ({ ok: r.ok, html: `${esc(r.m.text)}<br><span class="mono" style="font-size:11px;color:var(--muted)">previsto: ${LEAF_LABEL[r.pred]} · reale: ${LEAF_LABEL[r.m.truth]}</span>` })),
-          ok === results.length ? "Hai costruito un albero decisionale che generalizza bene sui dati di prova." : "L'errore nasce da un messaggio sconosciuto che chiede la password ma non ha link: con profondità 2 l'albero non ha una domanda per distinguerlo da una newsletter. Aggiungere livelli o feature lo risolverebbe, ma un albero troppo profondo rischia l'overfitting.");
-      }, 600);
-      return;
-    }
-    const m = TREE_TEST[i], pred = predictTree(m), ok = pred === m.truth;
-    $('tree-from').innerText = "Da: " + m.from; $('tree-mystery').innerText = m.text;
-    Object.keys(LEAF_LABEL).forEach(k => $('leaf-' + k).className = 'leaf');
-    nodeClass('tree-node-2a', ''); nodeClass('tree-node-2b', ''); $('tree-q1-controls').hidden = true;
-    nodeClass('tree-node-1', 'active'); playLaserScanSound();
-    setTimeout(() => {
-      if (run !== labRun) return;
-      playBip(); nodeClass('tree-node-1', 'passed');
-      nodeClass('tree-node-' + (m.contacts ? '2a' : '2b'), 'active');
-      setTimeout(() => {
-        if (run !== labRun) return;
-        $('tree-node-' + (m.contacts ? '2a' : '2b')).className = 'node ' + (m.contacts ? '' : '') + 'passed';
-        $('leaf-' + pred).className = 'leaf hit';
-        const b = $('tree-result-banner'); b.hidden = false; b.innerText = (ok ? '✓ ' : '✗ ') + 'Previsto: ' + LEAF_LABEL[pred] + (ok ? '' : ' · reale: ' + LEAF_LABEL[m.truth]);
-        b.style.background = ok ? 'var(--ok)' : 'var(--bad)'; b.style.color = ok ? '#04170f' : '#fff';
-        if (ok) { playSuccessSound(); updateRobotFace('happy'); } else { playErrorSound(); updateRobotFace('sad'); }
-        results.push({ m, pred, ok }); i++;
-        setTimeout(step, 1300);
-      }, 800);
-    }, 800);
-  };
-  step();
+function showFloatingFeedback(msg, isSuccess) {
+    const el = document.createElement('div');
+    el.className = `fixed top-1/2 left-1/2 px-6 py-3 rounded-2xl font-black text-sm sm:text-lg z-50 float-feedback shadow-2xl pointer-events-none ${isSuccess ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`;
+    el.innerText = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1300);
 }
 
-/* ===== AVVIO ===== */
-window.addEventListener('DOMContentLoaded', () => {
-  setupBasketDropZones();
-  renderHistorySlide(true);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('curiosity-modal').hidden = true; } });
-});
-if (document.readyState !== 'loading') { setupBasketDropZones(); renderHistorySlide(true); }
+function updateRobotFace(type) {
+    const avatar = document.getElementById('robot-avatar');
+    if (!avatar) return;
+    avatar.classList.remove('robot-happy', 'robot-sad');
+    if (type === 'happy') avatar.classList.add('robot-happy');
+    else if (type === 'sad') avatar.classList.add('robot-sad');
+}
+
+/* ============ SEZIONE 4: GLOSSARIO ============ */
+function renderGlossaryUI() {
+    renderGlossaryButtons();
+    renderSelectedGlossaryTerm();
+}
+
+function filterGlossary(filterType) {
+    playBip();
+    glossaryFilter = filterType;
+
+    document.getElementById('btn-glossary-filter-all').className = filterType === 'all' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-indigo-600 text-white border border-indigo-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-slate-700 border border-slate-300 hover:bg-slate-50";
+    document.getElementById('btn-glossary-filter-positive').className = filterType === 'positive' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-emerald-600 text-white border border-emerald-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-emerald-800 border border-emerald-300 hover:bg-emerald-50";
+    document.getElementById('btn-glossary-filter-negative').className = filterType === 'negative' ? "px-3 py-1.5 rounded-xl font-black text-xs bg-rose-600 text-white border border-rose-700 shadow" : "px-3 py-1.5 rounded-xl font-black text-xs bg-white text-rose-800 border border-rose-300 hover:bg-rose-50";
+
+    renderGlossaryButtons();
+}
+
+function renderGlossaryButtons() {
+    const grid = document.getElementById('glossary-buttons-grid');
+    grid.innerHTML = '';
+
+    GLOSSARY_TERMS.forEach((term, index) => {
+        if (glossaryFilter !== 'all' && term.category !== glossaryFilter) return;
+
+        const isSelected = index === selectedGlossaryTermIndex;
+        const isPos = term.category === 'positive';
+        const btn = document.createElement('button');
+
+        btn.className = `p-2 rounded-2xl border-2 font-black text-xs flex items-center gap-2 transition text-left shadow-sm min-w-0 ${
+            isSelected
+                ? 'bg-pink-400 text-pink-950 border-pink-500 scale-105 z-10 shadow-md'
+                : (isPos ? 'bg-emerald-50 text-emerald-950 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-950 border-rose-200 hover:bg-rose-100')
+        }`;
+        btn.title = term.name;
+        btn.onclick = () => selectGlossaryTerm(index);
+        btn.innerHTML = `<span class="text-xl shrink-0">${term.emoji}</span><span class="truncate leading-tight">${term.name}</span>`;
+        grid.appendChild(btn);
+    });
+}
+
+function selectGlossaryTerm(index) {
+    initAudio();
+    selectedGlossaryTermIndex = index;
+    renderGlossaryButtons();
+    renderSelectedGlossaryTerm();
+    speakSelectedGlossaryTerm();
+}
+
+function renderSelectedGlossaryTerm() {
+    const term = GLOSSARY_TERMS[selectedGlossaryTermIndex];
+    document.getElementById('glossary-term-icon').innerText = term.emoji;
+    document.getElementById('glossary-term-title').innerText = term.name;
+    document.getElementById('glossary-term-desc').innerText = term.desc;
+
+    const badge = document.getElementById('glossary-term-badge');
+    badge.innerText = term.badgeText;
+    badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-black border ${term.badgeClass}`;
+}
+
+function speakSelectedGlossaryTerm() {
+    playBip();
+    const term = GLOSSARY_TERMS[selectedGlossaryTermIndex];
+    setRobotText(term.speech);
+    speakText(term.speech);
+}
+
+function speakGlossaryContext() {
+    playBip();
+    const text = "Nel glossario trovi dieci difese e dieci rischi da conoscere. Tocca un termine per leggere la definizione e ascoltare la spiegazione di Robo Professoressa.";
+    setRobotText(text);
+    speakText(text);
+}
+
+/* ============ AVVIO ============ */
+renderStorySlide();
 </script>
 
 </body></html>
